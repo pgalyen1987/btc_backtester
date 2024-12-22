@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from typing import Dict, Any
 from .base_strategy import BaseStrategy
 
@@ -143,7 +144,8 @@ class CombinedStrategy(BaseStrategy):
         delta = signals['Close'].diff()
         gain = (delta.where(delta > 0, 0)).rolling(window=self.rsi_period).mean()
         loss = (-delta.where(delta < 0, 0)).rolling(window=self.rsi_period).mean()
-        rs = gain / loss
+        # Handle division by zero in RSI calculation
+        rs = gain / loss.replace(0, np.inf)
         signals['RSI'] = 100 - (100 / (1 + rs))
         
         # Calculate MACD
@@ -161,27 +163,29 @@ class CombinedStrategy(BaseStrategy):
         signals['curr_ma_diff'] = signals['MA_Short'] - signals['MA_Long']
         signals['prev_macd_hist'] = signals['MACD_Hist'].shift(1)
         
-        # Generate buy signals
+        # Generate buy signals - Relaxed conditions using OR instead of AND
+        ma_crossover_buy = (signals['curr_ma_diff'] > 0) & (signals['prev_ma_diff'] <= 0)
+        rsi_oversold = signals['RSI'] < self.rsi_threshold
+        macd_increasing = signals['MACD_Hist'] > signals['prev_macd_hist']
+        
+        # Buy if any two conditions are met
         buy_conditions = (
-            # MA Crossover (short crosses above long)
-            (signals['curr_ma_diff'] > 0) & 
-            (signals['prev_ma_diff'] <= 0) &
-            # RSI oversold
-            (signals['RSI'] < self.rsi_threshold) &
-            # MACD histogram increasing
-            (signals['MACD_Hist'] > signals['prev_macd_hist'])
+            (ma_crossover_buy & rsi_oversold) |
+            (ma_crossover_buy & macd_increasing) |
+            (rsi_oversold & macd_increasing)
         )
         signals.loc[buy_conditions, 'signal'] = 1
         
-        # Generate sell signals
+        # Generate sell signals - Relaxed conditions using OR instead of AND
+        ma_crossover_sell = (signals['curr_ma_diff'] < 0) & (signals['prev_ma_diff'] >= 0)
+        rsi_overbought = signals['RSI'] > (100 - self.rsi_threshold)
+        macd_decreasing = signals['MACD_Hist'] < signals['prev_macd_hist']
+        
+        # Sell if any two conditions are met
         sell_conditions = (
-            # MA Crossover (short crosses below long)
-            (signals['curr_ma_diff'] < 0) & 
-            (signals['prev_ma_diff'] >= 0) &
-            # RSI overbought
-            (signals['RSI'] > (100 - self.rsi_threshold)) &
-            # MACD histogram decreasing
-            (signals['MACD_Hist'] < signals['prev_macd_hist'])
+            (ma_crossover_sell & rsi_overbought) |
+            (ma_crossover_sell & macd_decreasing) |
+            (rsi_overbought & macd_decreasing)
         )
         signals.loc[sell_conditions, 'signal'] = -1
         
