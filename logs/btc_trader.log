@@ -1,0 +1,681 @@
+2024-12-22 14:10:48,434 - werkzeug - WARNING -  * Debugger is active!
+2024-12-22 14:10:48,435 - werkzeug - INFO -  * Debugger PIN: 733-361-644
+2024-12-22 14:12:25,851 - werkzeug - INFO -  * Detected change in '/home/me/btc_backtester/btc_trader/web/app.py', reloading
+2024-12-22 14:12:26,644 - werkzeug - WARNING -  * Debugger is active!
+2024-12-22 14:12:26,644 - werkzeug - INFO -  * Debugger PIN: 733-361-644
+2024-12-22 14:12:51,629 - werkzeug - INFO - 127.0.0.1 - - [22/Dec/2024 14:12:51] "OPTIONS /api/backtest HTTP/1.1" 200 -
+2024-12-22 14:12:51,631 - __main__ - INFO - Received backtest request with parameters: {'period_days': 30, 'interval': '1h', 'initial_capital': 10000, 'stop_loss': 0.02, 'take_profit': 0.05, 'position_size': 0.8}
+2024-12-22 14:12:51,631 - __main__ - INFO - Starting backtest with parameters: period_days=30, interval=1h
+2024-12-22 14:12:51,632 - yfinance - DEBUG - Entering history()
+2024-12-22 14:12:51,633 - peewee - DEBUG - ('CREATE TABLE IF NOT EXISTS "_kv" ("key" VARCHAR(255) NOT NULL PRIMARY KEY, "value" VARCHAR(255)) WITHOUT ROWID', [])
+2024-12-22 14:12:51,634 - peewee - DEBUG - ('SELECT "t1"."key", "t1"."value" FROM "_kv" AS "t1" WHERE ("t1"."key" = ?) LIMIT ? OFFSET ?', ['BTC-USD', 1, 0])
+2024-12-22 14:12:51,634 - yfinance - DEBUG - BTC-USD: Yahoo GET parameters: {'period1': '2024-11-22 14:12:51+00:00', 'period2': '2024-12-22 14:12:51+00:00', 'interval': '1h', 'includePrePost': False, 'events': 'div,splits,capitalGains'}
+2024-12-22 14:12:51,634 - yfinance - DEBUG -  Entering get()
+2024-12-22 14:12:51,634 - yfinance - DEBUG - url=https://query2.finance.yahoo.com/v8/finance/chart/BTC-USD
+2024-12-22 14:12:51,634 - yfinance - DEBUG - params=frozendict.frozendict({'period1': 1732284771, 'period2': 1734876771, 'interval': '1h', 'includePrePost': False, 'events': 'div,splits,capitalGains'})
+2024-12-22 14:12:51,634 - yfinance - DEBUG -   Entering _get_cookie_and_crumb()
+2024-12-22 14:12:51,634 - yfinance - DEBUG - cookie_mode = 'basic'
+2024-12-22 14:12:51,634 - yfinance - DEBUG -    Entering _get_cookie_and_crumb_basic()
+2024-12-22 14:12:51,635 - peewee - DEBUG - ('CREATE TABLE IF NOT EXISTS "_cookieschema" ("strategy" VARCHAR(255) NOT NULL PRIMARY KEY, "fetch_date" DATETIME NOT NULL, "cookie_bytes" BLOB NOT NULL) WITHOUT ROWID', [])
+2024-12-22 14:12:51,636 - peewee - DEBUG - ('SELECT "t1"."strategy", "t1"."fetch_date", "t1"."cookie_bytes" FROM "_cookieschema" AS "t1" WHERE ("t1"."strategy" = ?) LIMIT ? OFFSET ?', ['basic', 1, 0])
+2024-12-22 14:12:51,636 - yfinance - DEBUG - loaded persistent cookie
+2024-12-22 14:12:51,636 - yfinance - DEBUG - reusing cookie
+2024-12-22 14:12:51,638 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): query1.finance.yahoo.com:443
+2024-12-22 14:12:52,142 - urllib3.connectionpool - DEBUG - https://query1.finance.yahoo.com:443 "GET /v1/test/getcrumb HTTP/11" 200 11
+2024-12-22 14:12:52,143 - yfinance - DEBUG - crumb = 'PYJEkAOm0wA'
+2024-12-22 14:12:52,143 - yfinance - DEBUG -    Exiting _get_cookie_and_crumb_basic()
+2024-12-22 14:12:52,143 - yfinance - DEBUG -   Exiting _get_cookie_and_crumb()
+2024-12-22 14:12:52,144 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): query2.finance.yahoo.com:443
+2024-12-22 14:12:52,310 - urllib3.connectionpool - DEBUG - https://query2.finance.yahoo.com:443 "GET /v8/finance/chart/BTC-USD?period1=1732284771&period2=1734876771&interval=1h&includePrePost=False&events=div%2Csplits%2CcapitalGains&crumb=PYJEkAOm0wA HTTP/11" 200 None
+2024-12-22 14:12:52,322 - yfinance - DEBUG - response code=200
+2024-12-22 14:12:52,322 - yfinance - DEBUG -  Exiting get()
+2024-12-22 14:12:52,324 - yfinance - DEBUG - BTC-USD: yfinance received OHLC data: 2024-11-22 14:00:00 -> 2024-12-22 14:00:00
+2024-12-22 14:12:52,329 - yfinance - DEBUG - BTC-USD: OHLC after cleaning: 2024-11-22 14:00:00+00:00 -> 2024-12-22 14:00:00+00:00
+2024-12-22 14:12:52,331 - yfinance - DEBUG - BTC-USD: OHLC after combining events: 2024-11-22 14:00:00+00:00 -> 2024-12-22 14:00:00+00:00
+2024-12-22 14:12:52,334 - yfinance - DEBUG - BTC-USD: yfinance returning OHLC: 2024-11-22 14:00:00+00:00 -> 2024-12-22 14:00:00+00:00
+2024-12-22 14:12:52,334 - yfinance - DEBUG - Exiting history()
+2024-12-22 14:12:52,334 - __main__ - DEBUG - Fetched 721 data points
+2024-12-22 14:12:52,338 - __main__ - DEBUG - Data sample:                                    Open          High           Low         Close    Volume  Dividends  Stock Splits
+Datetime                                                                                                            
+2024-11-22 14:00:00+00:00  97854.367188  98162.593750  97276.460938  97309.890625         0        0.0           0.0
+2024-11-22 15:00:00+00:00  97319.523438  98862.476562  97319.523438  98850.867188         0        0.0           0.0
+2024-11-22 16:00:00+00:00  98807.609375  99100.648438  98366.664062  99081.843750         0        0.0           0.0
+2024-11-22 17:00:00+00:00  98977.031250  99348.156250  98964.460938  98997.242188  52748288        0.0           0.0
+2024-11-22 18:00:00+00:00  98936.750000  99239.882812  98826.218750  99163.210938         0        0.0           0.0
+2024-12-22 14:12:52,373 - __main__ - DEBUG - Added indicators. Available columns: ['Open', 'High', 'Low', 'Close', 'Volume', 'Dividends', 'Stock Splits', 'SMA_20', 'SMA_50', 'EMA_20', 'RSI_14', 'MACD', 'MACD_SIGNAL', 'MACD_HIST', 'BB_UPPER', 'BB_MIDDLE', 'BB_LOWER', 'BB_SQUEEZE', 'STOCH_14', 'STOCH_SIGNAL_14', 'ADX_14', 'ATR_14', 'VWAP', 'OBV', 'PP_FIB_R3', 'PP_FIB_S3', 'PP_FIBONACCI', 'PP_FIBONACCI_R1', 'PP_FIBONACCI_S1', 'PP_FIBONACCI_R2', 'PP_FIBONACCI_S2']
+2024-12-22 14:12:52,386 - __main__ - DEBUG - Indicators sample:                                    Open          High           Low         Close  ...  PP_FIBONACCI_R1  PP_FIBONACCI_S1  PP_FIBONACCI_R2  PP_FIBONACCI_S2
+Datetime                                                                           ...                                                                    
+2024-11-22 14:00:00+00:00  97854.367188  98162.593750  97276.460938  97309.890625  ...     97921.484505     97244.479036     98130.611849     97035.351693
+2024-11-22 15:00:00+00:00  97319.523438  98862.476562  97319.523438  98850.867188  ...     98933.697156     97754.880969     99297.834094     97390.744031
+2024-11-22 16:00:00+00:00  98807.609375  99100.648438  98366.664062  99081.843750  ...     99130.100781     98569.336719     99303.321094     98396.116406
+2024-11-22 17:00:00+00:00  98977.031250  99348.156250  98964.460938  98997.242188  ...     99249.858068     98956.714849     99340.410161     98866.162755
+2024-11-22 18:00:00+00:00  98936.750000  99239.882812  98826.218750  99163.210938  ...     99234.457172     98918.417828     99332.081891     98820.793109
+
+[5 rows x 31 columns]
+2024-12-22 14:12:52,386 - __main__ - INFO - Running backtest for Simple MA strategy
+2024-12-22 14:12:52,419 - __main__ - DEBUG - Completed backtest for Simple MA strategy
+2024-12-22 14:12:52,419 - __main__ - INFO - Running backtest for RSI strategy
+2024-12-22 14:12:52,451 - __main__ - DEBUG - Completed backtest for RSI strategy
+2024-12-22 14:12:52,451 - __main__ - INFO - Running backtest for MACD strategy
+2024-12-22 14:12:52,508 - __main__ - DEBUG - Completed backtest for MACD strategy
+2024-12-22 14:12:52,508 - __main__ - INFO - Running backtest for Combined strategy
+2024-12-22 14:12:52,546 - __main__ - DEBUG - Completed backtest for Combined strategy
+2024-12-22 14:12:52,547 - __main__ - DEBUG - Preparing response with keys: dict_keys(['Simple MA', 'RSI', 'MACD', 'Combined'])
+2024-12-22 14:12:52,551 - __main__ - DEBUG - Successfully created response
+2024-12-22 14:12:52,552 - werkzeug - INFO - 127.0.0.1 - - [22/Dec/2024 14:12:52] "POST /api/backtest HTTP/1.1" 200 -
+2024-12-22 14:42:32,550 - werkzeug - INFO -  * Detected change in '/home/me/btc_backtester/btc_trader/strategies/simple_ma_strategy.py', reloading
+2024-12-22 14:42:33,336 - werkzeug - WARNING -  * Debugger is active!
+2024-12-22 14:42:33,337 - werkzeug - INFO -  * Debugger PIN: 733-361-644
+2024-12-22 14:42:53,077 - werkzeug - INFO - 127.0.0.1 - - [22/Dec/2024 14:42:53] "OPTIONS /api/backtest HTTP/1.1" 200 -
+2024-12-22 14:42:53,081 - __main__ - INFO - Received backtest request with parameters: {'period_days': 30, 'interval': '1h', 'initial_capital': 10000, 'stop_loss': 0.02, 'take_profit': 0.05, 'position_size': 0.8}
+2024-12-22 14:42:53,081 - __main__ - INFO - Starting backtest with parameters: period_days=30, interval=1h
+2024-12-22 14:42:53,083 - yfinance - DEBUG - Entering history()
+2024-12-22 14:42:53,085 - peewee - DEBUG - ('CREATE TABLE IF NOT EXISTS "_kv" ("key" VARCHAR(255) NOT NULL PRIMARY KEY, "value" VARCHAR(255)) WITHOUT ROWID', [])
+2024-12-22 14:42:53,085 - peewee - DEBUG - ('SELECT "t1"."key", "t1"."value" FROM "_kv" AS "t1" WHERE ("t1"."key" = ?) LIMIT ? OFFSET ?', ['BTC-USD', 1, 0])
+2024-12-22 14:42:53,085 - yfinance - DEBUG - BTC-USD: Yahoo GET parameters: {'period1': '2024-11-22 14:42:53+00:00', 'period2': '2024-12-22 14:42:53+00:00', 'interval': '1h', 'includePrePost': False, 'events': 'div,splits,capitalGains'}
+2024-12-22 14:42:53,085 - yfinance - DEBUG -  Entering get()
+2024-12-22 14:42:53,086 - yfinance - DEBUG - url=https://query2.finance.yahoo.com/v8/finance/chart/BTC-USD
+2024-12-22 14:42:53,086 - yfinance - DEBUG - params=frozendict.frozendict({'period1': 1732286573, 'period2': 1734878573, 'interval': '1h', 'includePrePost': False, 'events': 'div,splits,capitalGains'})
+2024-12-22 14:42:53,086 - yfinance - DEBUG -   Entering _get_cookie_and_crumb()
+2024-12-22 14:42:53,086 - yfinance - DEBUG - cookie_mode = 'basic'
+2024-12-22 14:42:53,086 - yfinance - DEBUG -    Entering _get_cookie_and_crumb_basic()
+2024-12-22 14:42:53,086 - peewee - DEBUG - ('CREATE TABLE IF NOT EXISTS "_cookieschema" ("strategy" VARCHAR(255) NOT NULL PRIMARY KEY, "fetch_date" DATETIME NOT NULL, "cookie_bytes" BLOB NOT NULL) WITHOUT ROWID', [])
+2024-12-22 14:42:53,087 - peewee - DEBUG - ('SELECT "t1"."strategy", "t1"."fetch_date", "t1"."cookie_bytes" FROM "_cookieschema" AS "t1" WHERE ("t1"."strategy" = ?) LIMIT ? OFFSET ?', ['basic', 1, 0])
+2024-12-22 14:42:53,087 - yfinance - DEBUG - loaded persistent cookie
+2024-12-22 14:42:53,087 - yfinance - DEBUG - reusing cookie
+2024-12-22 14:42:53,089 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): query1.finance.yahoo.com:443
+2024-12-22 14:42:53,790 - urllib3.connectionpool - DEBUG - https://query1.finance.yahoo.com:443 "GET /v1/test/getcrumb HTTP/11" 200 11
+2024-12-22 14:42:53,790 - yfinance - DEBUG - crumb = 'PYJEkAOm0wA'
+2024-12-22 14:42:53,790 - yfinance - DEBUG -    Exiting _get_cookie_and_crumb_basic()
+2024-12-22 14:42:53,790 - yfinance - DEBUG -   Exiting _get_cookie_and_crumb()
+2024-12-22 14:42:53,791 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): query2.finance.yahoo.com:443
+2024-12-22 14:42:54,403 - urllib3.connectionpool - DEBUG - https://query2.finance.yahoo.com:443 "GET /v8/finance/chart/BTC-USD?period1=1732286573&period2=1734878573&interval=1h&includePrePost=False&events=div%2Csplits%2CcapitalGains&crumb=PYJEkAOm0wA HTTP/11" 200 None
+2024-12-22 14:42:54,416 - yfinance - DEBUG - response code=200
+2024-12-22 14:42:54,416 - yfinance - DEBUG -  Exiting get()
+2024-12-22 14:42:54,419 - yfinance - DEBUG - BTC-USD: yfinance received OHLC data: 2024-11-22 14:00:00 -> 2024-12-22 14:00:00
+2024-12-22 14:42:54,423 - yfinance - DEBUG - BTC-USD: OHLC after cleaning: 2024-11-22 14:00:00+00:00 -> 2024-12-22 14:00:00+00:00
+2024-12-22 14:42:54,424 - yfinance - DEBUG - BTC-USD: OHLC after combining events: 2024-11-22 14:00:00+00:00 -> 2024-12-22 14:00:00+00:00
+2024-12-22 14:42:54,428 - yfinance - DEBUG - BTC-USD: yfinance returning OHLC: 2024-11-22 14:00:00+00:00 -> 2024-12-22 14:00:00+00:00
+2024-12-22 14:42:54,428 - yfinance - DEBUG - Exiting history()
+2024-12-22 14:42:54,428 - __main__ - DEBUG - Fetched 721 data points
+2024-12-22 14:42:54,433 - __main__ - DEBUG - Data sample:                                    Open          High           Low         Close    Volume  Dividends  Stock Splits
+Datetime                                                                                                            
+2024-11-22 14:00:00+00:00  97854.367188  98162.593750  97276.460938  97309.890625         0        0.0           0.0
+2024-11-22 15:00:00+00:00  97319.523438  98862.476562  97319.523438  98850.867188         0        0.0           0.0
+2024-11-22 16:00:00+00:00  98807.609375  99100.648438  98366.664062  99081.843750         0        0.0           0.0
+2024-11-22 17:00:00+00:00  98977.031250  99348.156250  98964.460938  98997.242188  52748288        0.0           0.0
+2024-11-22 18:00:00+00:00  98936.750000  99239.882812  98826.218750  99163.210938         0        0.0           0.0
+2024-12-22 14:42:54,461 - __main__ - DEBUG - Added indicators. Available columns: ['Open', 'High', 'Low', 'Close', 'Volume', 'Dividends', 'Stock Splits', 'SMA_20', 'SMA_50', 'EMA_20', 'RSI_14', 'MACD', 'MACD_SIGNAL', 'MACD_HIST', 'BB_UPPER', 'BB_MIDDLE', 'BB_LOWER', 'BB_SQUEEZE', 'STOCH_14', 'STOCH_SIGNAL_14', 'ADX_14', 'ATR_14', 'VWAP', 'OBV', 'PP_FIB_R3', 'PP_FIB_S3', 'PP_FIBONACCI', 'PP_FIBONACCI_R1', 'PP_FIBONACCI_S1', 'PP_FIBONACCI_R2', 'PP_FIBONACCI_S2']
+2024-12-22 14:42:54,473 - __main__ - DEBUG - Indicators sample:                                    Open          High           Low         Close  ...  PP_FIBONACCI_R1  PP_FIBONACCI_S1  PP_FIBONACCI_R2  PP_FIBONACCI_S2
+Datetime                                                                           ...                                                                    
+2024-11-22 14:00:00+00:00  97854.367188  98162.593750  97276.460938  97309.890625  ...     97921.484505     97244.479036     98130.611849     97035.351693
+2024-11-22 15:00:00+00:00  97319.523438  98862.476562  97319.523438  98850.867188  ...     98933.697156     97754.880969     99297.834094     97390.744031
+2024-11-22 16:00:00+00:00  98807.609375  99100.648438  98366.664062  99081.843750  ...     99130.100781     98569.336719     99303.321094     98396.116406
+2024-11-22 17:00:00+00:00  98977.031250  99348.156250  98964.460938  98997.242188  ...     99249.858068     98956.714849     99340.410161     98866.162755
+2024-11-22 18:00:00+00:00  98936.750000  99239.882812  98826.218750  99163.210938  ...     99234.457172     98918.417828     99332.081891     98820.793109
+
+[5 rows x 31 columns]
+2024-12-22 14:42:54,473 - __main__ - INFO - Running backtest for Simple MA strategy
+2024-12-22 14:42:54,508 - __main__ - DEBUG - Completed backtest for Simple MA strategy
+2024-12-22 14:42:54,508 - __main__ - INFO - Running backtest for RSI strategy
+2024-12-22 14:42:54,543 - __main__ - DEBUG - Completed backtest for RSI strategy
+2024-12-22 14:42:54,543 - __main__ - INFO - Running backtest for MACD strategy
+2024-12-22 14:42:54,605 - __main__ - DEBUG - Completed backtest for MACD strategy
+2024-12-22 14:42:54,605 - __main__ - INFO - Running backtest for Combined strategy
+2024-12-22 14:42:54,641 - __main__ - DEBUG - Completed backtest for Combined strategy
+2024-12-22 14:42:54,641 - __main__ - DEBUG - Preparing response with keys: dict_keys(['Simple MA', 'RSI', 'MACD', 'Combined'])
+2024-12-22 14:42:54,647 - __main__ - DEBUG - Successfully created response
+2024-12-22 14:42:54,647 - werkzeug - INFO - 127.0.0.1 - - [22/Dec/2024 14:42:54] "POST /api/backtest HTTP/1.1" 200 -
+2024-12-22 14:44:36,690 - werkzeug - INFO -  * Detected change in '/home/me/btc_backtester/btc_trader/web/app.py', reloading
+2024-12-22 14:44:37,507 - werkzeug - WARNING -  * Debugger is active!
+2024-12-22 14:44:37,507 - werkzeug - INFO -  * Debugger PIN: 733-361-644
+2024-12-22 14:47:49,670 - werkzeug - INFO - 127.0.0.1 - - [22/Dec/2024 14:47:49] "OPTIONS /api/backtest HTTP/1.1" 200 -
+2024-12-22 14:47:49,672 - __main__ - INFO - Received backtest request with parameters: {'period_days': 30, 'interval': '1h', 'initial_capital': 10000, 'stop_loss': 0.02, 'take_profit': 0.05, 'position_size': 0.8}
+2024-12-22 14:47:49,672 - __main__ - INFO - Starting backtest with parameters: period_days=30, interval=1h
+2024-12-22 14:47:49,673 - yfinance - DEBUG - Entering history()
+2024-12-22 14:47:49,674 - peewee - DEBUG - ('CREATE TABLE IF NOT EXISTS "_kv" ("key" VARCHAR(255) NOT NULL PRIMARY KEY, "value" VARCHAR(255)) WITHOUT ROWID', [])
+2024-12-22 14:47:49,674 - peewee - DEBUG - ('SELECT "t1"."key", "t1"."value" FROM "_kv" AS "t1" WHERE ("t1"."key" = ?) LIMIT ? OFFSET ?', ['BTC-USD', 1, 0])
+2024-12-22 14:47:49,675 - yfinance - DEBUG - BTC-USD: Yahoo GET parameters: {'period1': '2024-11-22 14:47:49+00:00', 'period2': '2024-12-22 14:47:49+00:00', 'interval': '1h', 'includePrePost': False, 'events': 'div,splits,capitalGains'}
+2024-12-22 14:47:49,675 - yfinance - DEBUG -  Entering get()
+2024-12-22 14:47:49,675 - yfinance - DEBUG - url=https://query2.finance.yahoo.com/v8/finance/chart/BTC-USD
+2024-12-22 14:47:49,675 - yfinance - DEBUG - params=frozendict.frozendict({'period1': 1732286869, 'period2': 1734878869, 'interval': '1h', 'includePrePost': False, 'events': 'div,splits,capitalGains'})
+2024-12-22 14:47:49,675 - yfinance - DEBUG -   Entering _get_cookie_and_crumb()
+2024-12-22 14:47:49,675 - yfinance - DEBUG - cookie_mode = 'basic'
+2024-12-22 14:47:49,675 - yfinance - DEBUG -    Entering _get_cookie_and_crumb_basic()
+2024-12-22 14:47:49,676 - peewee - DEBUG - ('CREATE TABLE IF NOT EXISTS "_cookieschema" ("strategy" VARCHAR(255) NOT NULL PRIMARY KEY, "fetch_date" DATETIME NOT NULL, "cookie_bytes" BLOB NOT NULL) WITHOUT ROWID', [])
+2024-12-22 14:47:49,676 - peewee - DEBUG - ('SELECT "t1"."strategy", "t1"."fetch_date", "t1"."cookie_bytes" FROM "_cookieschema" AS "t1" WHERE ("t1"."strategy" = ?) LIMIT ? OFFSET ?', ['basic', 1, 0])
+2024-12-22 14:47:49,677 - yfinance - DEBUG - loaded persistent cookie
+2024-12-22 14:47:49,677 - yfinance - DEBUG - reusing cookie
+2024-12-22 14:47:49,679 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): query1.finance.yahoo.com:443
+2024-12-22 14:47:50,108 - urllib3.connectionpool - DEBUG - https://query1.finance.yahoo.com:443 "GET /v1/test/getcrumb HTTP/11" 200 11
+2024-12-22 14:47:50,109 - yfinance - DEBUG - crumb = 'PYJEkAOm0wA'
+2024-12-22 14:47:50,109 - yfinance - DEBUG -    Exiting _get_cookie_and_crumb_basic()
+2024-12-22 14:47:50,109 - yfinance - DEBUG -   Exiting _get_cookie_and_crumb()
+2024-12-22 14:47:50,110 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): query2.finance.yahoo.com:443
+2024-12-22 14:47:50,448 - urllib3.connectionpool - DEBUG - https://query2.finance.yahoo.com:443 "GET /v8/finance/chart/BTC-USD?period1=1732286869&period2=1734878869&interval=1h&includePrePost=False&events=div%2Csplits%2CcapitalGains&crumb=PYJEkAOm0wA HTTP/11" 200 None
+2024-12-22 14:47:50,468 - yfinance - DEBUG - response code=200
+2024-12-22 14:47:50,468 - yfinance - DEBUG -  Exiting get()
+2024-12-22 14:47:50,472 - yfinance - DEBUG - BTC-USD: yfinance received OHLC data: 2024-11-22 14:00:00 -> 2024-12-22 14:00:00
+2024-12-22 14:47:50,478 - yfinance - DEBUG - BTC-USD: OHLC after cleaning: 2024-11-22 14:00:00+00:00 -> 2024-12-22 14:00:00+00:00
+2024-12-22 14:47:50,480 - yfinance - DEBUG - BTC-USD: OHLC after combining events: 2024-11-22 14:00:00+00:00 -> 2024-12-22 14:00:00+00:00
+2024-12-22 14:47:50,484 - yfinance - DEBUG - BTC-USD: yfinance returning OHLC: 2024-11-22 14:00:00+00:00 -> 2024-12-22 14:00:00+00:00
+2024-12-22 14:47:50,484 - yfinance - DEBUG - Exiting history()
+2024-12-22 14:47:50,484 - __main__ - DEBUG - Fetched 721 data points
+2024-12-22 14:47:50,492 - __main__ - DEBUG - Data sample:                                    Open          High           Low         Close    Volume  Dividends  Stock Splits
+Datetime                                                                                                            
+2024-11-22 14:00:00+00:00  97854.367188  98162.593750  97276.460938  97309.890625         0        0.0           0.0
+2024-11-22 15:00:00+00:00  97319.523438  98862.476562  97319.523438  98850.867188         0        0.0           0.0
+2024-11-22 16:00:00+00:00  98807.609375  99100.648438  98366.664062  99081.843750         0        0.0           0.0
+2024-11-22 17:00:00+00:00  98977.031250  99348.156250  98964.460938  98997.242188  52748288        0.0           0.0
+2024-11-22 18:00:00+00:00  98936.750000  99239.882812  98826.218750  99163.210938         0        0.0           0.0
+2024-12-22 14:47:50,532 - __main__ - DEBUG - Added indicators. Available columns: ['Open', 'High', 'Low', 'Close', 'Volume', 'Dividends', 'Stock Splits', 'SMA_20', 'SMA_50', 'EMA_20', 'RSI_14', 'MACD', 'MACD_SIGNAL', 'MACD_HIST', 'BB_UPPER', 'BB_MIDDLE', 'BB_LOWER', 'BB_SQUEEZE', 'STOCH_14', 'STOCH_SIGNAL_14', 'ADX_14', 'ATR_14', 'VWAP', 'OBV', 'PP_FIB_R3', 'PP_FIB_S3', 'PP_FIBONACCI', 'PP_FIBONACCI_R1', 'PP_FIBONACCI_S1', 'PP_FIBONACCI_R2', 'PP_FIBONACCI_S2']
+2024-12-22 14:47:50,546 - __main__ - DEBUG - Indicators sample:                                    Open          High           Low         Close  ...  PP_FIBONACCI_R1  PP_FIBONACCI_S1  PP_FIBONACCI_R2  PP_FIBONACCI_S2
+Datetime                                                                           ...                                                                    
+2024-11-22 14:00:00+00:00  97854.367188  98162.593750  97276.460938  97309.890625  ...     97921.484505     97244.479036     98130.611849     97035.351693
+2024-11-22 15:00:00+00:00  97319.523438  98862.476562  97319.523438  98850.867188  ...     98933.697156     97754.880969     99297.834094     97390.744031
+2024-11-22 16:00:00+00:00  98807.609375  99100.648438  98366.664062  99081.843750  ...     99130.100781     98569.336719     99303.321094     98396.116406
+2024-11-22 17:00:00+00:00  98977.031250  99348.156250  98964.460938  98997.242188  ...     99249.858068     98956.714849     99340.410161     98866.162755
+2024-11-22 18:00:00+00:00  98936.750000  99239.882812  98826.218750  99163.210938  ...     99234.457172     98918.417828     99332.081891     98820.793109
+
+[5 rows x 31 columns]
+2024-12-22 14:47:50,546 - __main__ - INFO - Running backtest for Simple MA strategy
+2024-12-22 14:47:50,591 - __main__ - ERROR - Error in strategy Simple MA: type NoneType doesn't define __round__ method
+2024-12-22 14:47:50,592 - __main__ - ERROR - Traceback (most recent call last):
+  File "/home/me/btc_backtester/btc_trader/web/app.py", line 165, in run_backtest
+    'returns': [round(serialize_numpy(x), 6) for x in backtest_result['portfolio']['returns'].tolist()],
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/me/btc_backtester/btc_trader/web/app.py", line 165, in <listcomp>
+    'returns': [round(serialize_numpy(x), 6) for x in backtest_result['portfolio']['returns'].tolist()],
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: type NoneType doesn't define __round__ method
+
+2024-12-22 14:47:50,592 - __main__ - INFO - Running backtest for RSI strategy
+2024-12-22 14:47:50,627 - __main__ - ERROR - Error in strategy RSI: type NoneType doesn't define __round__ method
+2024-12-22 14:47:50,627 - __main__ - ERROR - Traceback (most recent call last):
+  File "/home/me/btc_backtester/btc_trader/web/app.py", line 165, in run_backtest
+    'returns': [round(serialize_numpy(x), 6) for x in backtest_result['portfolio']['returns'].tolist()],
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/me/btc_backtester/btc_trader/web/app.py", line 165, in <listcomp>
+    'returns': [round(serialize_numpy(x), 6) for x in backtest_result['portfolio']['returns'].tolist()],
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: type NoneType doesn't define __round__ method
+
+2024-12-22 14:47:50,627 - __main__ - INFO - Running backtest for MACD strategy
+2024-12-22 14:47:50,711 - __main__ - ERROR - Error in strategy MACD: type NoneType doesn't define __round__ method
+2024-12-22 14:47:50,711 - __main__ - ERROR - Traceback (most recent call last):
+  File "/home/me/btc_backtester/btc_trader/web/app.py", line 165, in run_backtest
+    'returns': [round(serialize_numpy(x), 6) for x in backtest_result['portfolio']['returns'].tolist()],
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/me/btc_backtester/btc_trader/web/app.py", line 165, in <listcomp>
+    'returns': [round(serialize_numpy(x), 6) for x in backtest_result['portfolio']['returns'].tolist()],
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: type NoneType doesn't define __round__ method
+
+2024-12-22 14:47:50,711 - __main__ - INFO - Running backtest for Combined strategy
+2024-12-22 14:47:50,744 - __main__ - ERROR - Error in strategy Combined: type NoneType doesn't define __round__ method
+2024-12-22 14:47:50,745 - __main__ - ERROR - Traceback (most recent call last):
+  File "/home/me/btc_backtester/btc_trader/web/app.py", line 165, in run_backtest
+    'returns': [round(serialize_numpy(x), 6) for x in backtest_result['portfolio']['returns'].tolist()],
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/me/btc_backtester/btc_trader/web/app.py", line 165, in <listcomp>
+    'returns': [round(serialize_numpy(x), 6) for x in backtest_result['portfolio']['returns'].tolist()],
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: type NoneType doesn't define __round__ method
+
+2024-12-22 14:47:50,745 - __main__ - DEBUG - Preparing response with keys: dict_keys(['Simple MA', 'RSI', 'MACD', 'Combined'])
+2024-12-22 14:47:50,745 - __main__ - DEBUG - Successfully created response
+2024-12-22 14:47:50,745 - werkzeug - INFO - 127.0.0.1 - - [22/Dec/2024 14:47:50] "POST /api/backtest HTTP/1.1" 200 -
+2024-12-22 14:49:39,003 - werkzeug - INFO -  * Detected change in '/home/me/btc_backtester/btc_trader/web/app.py', reloading
+2024-12-22 14:49:39,868 - werkzeug - WARNING -  * Debugger is active!
+2024-12-22 14:49:39,869 - werkzeug - INFO -  * Debugger PIN: 733-361-644
+2024-12-22 14:50:01,658 - werkzeug - INFO - 127.0.0.1 - - [22/Dec/2024 14:50:01] "OPTIONS /api/backtest HTTP/1.1" 200 -
+2024-12-22 14:50:01,662 - __main__ - INFO - Received backtest request with parameters: {'period_days': 30, 'interval': '1h', 'initial_capital': 10000, 'stop_loss': 0.02, 'take_profit': 0.05, 'position_size': 0.8}
+2024-12-22 14:50:01,662 - __main__ - INFO - Starting backtest with parameters: period_days=30, interval=1h
+2024-12-22 14:50:01,662 - yfinance - DEBUG - Entering history()
+2024-12-22 14:50:01,663 - peewee - DEBUG - ('CREATE TABLE IF NOT EXISTS "_kv" ("key" VARCHAR(255) NOT NULL PRIMARY KEY, "value" VARCHAR(255)) WITHOUT ROWID', [])
+2024-12-22 14:50:01,664 - peewee - DEBUG - ('SELECT "t1"."key", "t1"."value" FROM "_kv" AS "t1" WHERE ("t1"."key" = ?) LIMIT ? OFFSET ?', ['BTC-USD', 1, 0])
+2024-12-22 14:50:01,664 - yfinance - DEBUG - BTC-USD: Yahoo GET parameters: {'period1': '2024-11-22 14:50:01+00:00', 'period2': '2024-12-22 14:50:01+00:00', 'interval': '1h', 'includePrePost': False, 'events': 'div,splits,capitalGains'}
+2024-12-22 14:50:01,665 - yfinance - DEBUG -  Entering get()
+2024-12-22 14:50:01,665 - yfinance - DEBUG - url=https://query2.finance.yahoo.com/v8/finance/chart/BTC-USD
+2024-12-22 14:50:01,665 - yfinance - DEBUG - params=frozendict.frozendict({'period1': 1732287001, 'period2': 1734879001, 'interval': '1h', 'includePrePost': False, 'events': 'div,splits,capitalGains'})
+2024-12-22 14:50:01,665 - yfinance - DEBUG -   Entering _get_cookie_and_crumb()
+2024-12-22 14:50:01,665 - yfinance - DEBUG - cookie_mode = 'basic'
+2024-12-22 14:50:01,665 - yfinance - DEBUG -    Entering _get_cookie_and_crumb_basic()
+2024-12-22 14:50:01,666 - peewee - DEBUG - ('CREATE TABLE IF NOT EXISTS "_cookieschema" ("strategy" VARCHAR(255) NOT NULL PRIMARY KEY, "fetch_date" DATETIME NOT NULL, "cookie_bytes" BLOB NOT NULL) WITHOUT ROWID', [])
+2024-12-22 14:50:01,667 - peewee - DEBUG - ('SELECT "t1"."strategy", "t1"."fetch_date", "t1"."cookie_bytes" FROM "_cookieschema" AS "t1" WHERE ("t1"."strategy" = ?) LIMIT ? OFFSET ?', ['basic', 1, 0])
+2024-12-22 14:50:01,667 - yfinance - DEBUG - loaded persistent cookie
+2024-12-22 14:50:01,667 - yfinance - DEBUG - reusing cookie
+2024-12-22 14:50:01,669 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): query1.finance.yahoo.com:443
+2024-12-22 14:50:02,068 - urllib3.connectionpool - DEBUG - https://query1.finance.yahoo.com:443 "GET /v1/test/getcrumb HTTP/11" 200 11
+2024-12-22 14:50:02,069 - yfinance - DEBUG - crumb = 'PYJEkAOm0wA'
+2024-12-22 14:50:02,069 - yfinance - DEBUG -    Exiting _get_cookie_and_crumb_basic()
+2024-12-22 14:50:02,069 - yfinance - DEBUG -   Exiting _get_cookie_and_crumb()
+2024-12-22 14:50:02,070 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): query2.finance.yahoo.com:443
+2024-12-22 14:50:02,288 - urllib3.connectionpool - DEBUG - https://query2.finance.yahoo.com:443 "GET /v8/finance/chart/BTC-USD?period1=1732287001&period2=1734879001&interval=1h&includePrePost=False&events=div%2Csplits%2CcapitalGains&crumb=PYJEkAOm0wA HTTP/11" 200 None
+2024-12-22 14:50:02,308 - yfinance - DEBUG - response code=200
+2024-12-22 14:50:02,308 - yfinance - DEBUG -  Exiting get()
+2024-12-22 14:50:02,310 - yfinance - DEBUG - BTC-USD: yfinance received OHLC data: 2024-11-22 14:00:00 -> 2024-12-22 14:00:00
+2024-12-22 14:50:02,316 - yfinance - DEBUG - BTC-USD: OHLC after cleaning: 2024-11-22 14:00:00+00:00 -> 2024-12-22 14:00:00+00:00
+2024-12-22 14:50:02,318 - yfinance - DEBUG - BTC-USD: OHLC after combining events: 2024-11-22 14:00:00+00:00 -> 2024-12-22 14:00:00+00:00
+2024-12-22 14:50:02,321 - yfinance - DEBUG - BTC-USD: yfinance returning OHLC: 2024-11-22 14:00:00+00:00 -> 2024-12-22 14:00:00+00:00
+2024-12-22 14:50:02,321 - yfinance - DEBUG - Exiting history()
+2024-12-22 14:50:02,321 - __main__ - DEBUG - Fetched 721 data points
+2024-12-22 14:50:02,326 - __main__ - DEBUG - Data sample:                                    Open          High           Low         Close    Volume  Dividends  Stock Splits
+Datetime                                                                                                            
+2024-11-22 14:00:00+00:00  97854.367188  98162.593750  97276.460938  97309.890625         0        0.0           0.0
+2024-11-22 15:00:00+00:00  97319.523438  98862.476562  97319.523438  98850.867188         0        0.0           0.0
+2024-11-22 16:00:00+00:00  98807.609375  99100.648438  98366.664062  99081.843750         0        0.0           0.0
+2024-11-22 17:00:00+00:00  98977.031250  99348.156250  98964.460938  98997.242188  52748288        0.0           0.0
+2024-11-22 18:00:00+00:00  98936.750000  99239.882812  98826.218750  99163.210938         0        0.0           0.0
+2024-12-22 14:50:02,361 - __main__ - DEBUG - Added indicators. Available columns: ['Open', 'High', 'Low', 'Close', 'Volume', 'Dividends', 'Stock Splits', 'SMA_20', 'SMA_50', 'EMA_20', 'RSI_14', 'MACD', 'MACD_SIGNAL', 'MACD_HIST', 'BB_UPPER', 'BB_MIDDLE', 'BB_LOWER', 'BB_SQUEEZE', 'STOCH_14', 'STOCH_SIGNAL_14', 'ADX_14', 'ATR_14', 'VWAP', 'OBV', 'PP_FIB_R3', 'PP_FIB_S3', 'PP_FIBONACCI', 'PP_FIBONACCI_R1', 'PP_FIBONACCI_S1', 'PP_FIBONACCI_R2', 'PP_FIBONACCI_S2']
+2024-12-22 14:50:02,375 - __main__ - DEBUG - Indicators sample:                                    Open          High           Low         Close  ...  PP_FIBONACCI_R1  PP_FIBONACCI_S1  PP_FIBONACCI_R2  PP_FIBONACCI_S2
+Datetime                                                                           ...                                                                    
+2024-11-22 14:00:00+00:00  97854.367188  98162.593750  97276.460938  97309.890625  ...     97921.484505     97244.479036     98130.611849     97035.351693
+2024-11-22 15:00:00+00:00  97319.523438  98862.476562  97319.523438  98850.867188  ...     98933.697156     97754.880969     99297.834094     97390.744031
+2024-11-22 16:00:00+00:00  98807.609375  99100.648438  98366.664062  99081.843750  ...     99130.100781     98569.336719     99303.321094     98396.116406
+2024-11-22 17:00:00+00:00  98977.031250  99348.156250  98964.460938  98997.242188  ...     99249.858068     98956.714849     99340.410161     98866.162755
+2024-11-22 18:00:00+00:00  98936.750000  99239.882812  98826.218750  99163.210938  ...     99234.457172     98918.417828     99332.081891     98820.793109
+
+[5 rows x 31 columns]
+2024-12-22 14:50:02,375 - __main__ - INFO - Running backtest for Simple MA strategy
+2024-12-22 14:50:02,412 - __main__ - DEBUG - Completed backtest for Simple MA strategy
+2024-12-22 14:50:02,412 - __main__ - INFO - Running backtest for RSI strategy
+2024-12-22 14:50:02,439 - __main__ - DEBUG - Completed backtest for RSI strategy
+2024-12-22 14:50:02,439 - __main__ - INFO - Running backtest for MACD strategy
+2024-12-22 14:50:02,492 - __main__ - DEBUG - Completed backtest for MACD strategy
+2024-12-22 14:50:02,492 - __main__ - INFO - Running backtest for Combined strategy
+2024-12-22 14:50:02,519 - __main__ - ERROR - Error in strategy Combined: cannot convert float NaN to integer
+2024-12-22 14:50:02,519 - __main__ - ERROR - Traceback (most recent call last):
+  File "/home/me/btc_backtester/btc_trader/web/app.py", line 157, in run_backtest
+    'signals': [int(serialize_numpy(x)) for x in strategy.generate_signals()['signal'].tolist()],
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/me/btc_backtester/btc_trader/web/app.py", line 157, in <listcomp>
+    'signals': [int(serialize_numpy(x)) for x in strategy.generate_signals()['signal'].tolist()],
+                ^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: cannot convert float NaN to integer
+
+2024-12-22 14:50:02,519 - __main__ - DEBUG - Preparing response with keys: dict_keys(['Simple MA', 'RSI', 'MACD', 'Combined'])
+2024-12-22 14:50:02,522 - __main__ - DEBUG - Successfully created response
+2024-12-22 14:50:02,523 - werkzeug - INFO - 127.0.0.1 - - [22/Dec/2024 14:50:02] "POST /api/backtest HTTP/1.1" 200 -
+2024-12-22 14:50:37,831 - werkzeug - INFO -  * Detected change in '/home/me/btc_backtester/btc_trader/web/app.py', reloading
+2024-12-22 14:50:38,598 - werkzeug - WARNING -  * Debugger is active!
+2024-12-22 14:50:38,599 - werkzeug - INFO -  * Debugger PIN: 733-361-644
+2024-12-22 14:50:45,024 - werkzeug - INFO - 127.0.0.1 - - [22/Dec/2024 14:50:45] "OPTIONS /api/backtest HTTP/1.1" 200 -
+2024-12-22 14:50:45,027 - __main__ - INFO - Received backtest request with parameters: {'period_days': 30, 'interval': '1h', 'initial_capital': 10000, 'stop_loss': 0.02, 'take_profit': 0.05, 'position_size': 0.8}
+2024-12-22 14:50:45,027 - __main__ - INFO - Starting backtest with parameters: period_days=30, interval=1h
+2024-12-22 14:50:45,027 - yfinance - DEBUG - Entering history()
+2024-12-22 14:50:45,028 - peewee - DEBUG - ('CREATE TABLE IF NOT EXISTS "_kv" ("key" VARCHAR(255) NOT NULL PRIMARY KEY, "value" VARCHAR(255)) WITHOUT ROWID', [])
+2024-12-22 14:50:45,028 - peewee - DEBUG - ('SELECT "t1"."key", "t1"."value" FROM "_kv" AS "t1" WHERE ("t1"."key" = ?) LIMIT ? OFFSET ?', ['BTC-USD', 1, 0])
+2024-12-22 14:50:45,029 - yfinance - DEBUG - BTC-USD: Yahoo GET parameters: {'period1': '2024-11-22 14:50:45+00:00', 'period2': '2024-12-22 14:50:45+00:00', 'interval': '1h', 'includePrePost': False, 'events': 'div,splits,capitalGains'}
+2024-12-22 14:50:45,029 - yfinance - DEBUG -  Entering get()
+2024-12-22 14:50:45,029 - yfinance - DEBUG - url=https://query2.finance.yahoo.com/v8/finance/chart/BTC-USD
+2024-12-22 14:50:45,029 - yfinance - DEBUG - params=frozendict.frozendict({'period1': 1732287045, 'period2': 1734879045, 'interval': '1h', 'includePrePost': False, 'events': 'div,splits,capitalGains'})
+2024-12-22 14:50:45,029 - yfinance - DEBUG -   Entering _get_cookie_and_crumb()
+2024-12-22 14:50:45,029 - yfinance - DEBUG - cookie_mode = 'basic'
+2024-12-22 14:50:45,029 - yfinance - DEBUG -    Entering _get_cookie_and_crumb_basic()
+2024-12-22 14:50:45,030 - peewee - DEBUG - ('CREATE TABLE IF NOT EXISTS "_cookieschema" ("strategy" VARCHAR(255) NOT NULL PRIMARY KEY, "fetch_date" DATETIME NOT NULL, "cookie_bytes" BLOB NOT NULL) WITHOUT ROWID', [])
+2024-12-22 14:50:45,030 - peewee - DEBUG - ('SELECT "t1"."strategy", "t1"."fetch_date", "t1"."cookie_bytes" FROM "_cookieschema" AS "t1" WHERE ("t1"."strategy" = ?) LIMIT ? OFFSET ?', ['basic', 1, 0])
+2024-12-22 14:50:45,030 - yfinance - DEBUG - loaded persistent cookie
+2024-12-22 14:50:45,030 - yfinance - DEBUG - reusing cookie
+2024-12-22 14:50:45,032 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): query1.finance.yahoo.com:443
+2024-12-22 14:50:45,128 - urllib3.connectionpool - DEBUG - https://query1.finance.yahoo.com:443 "GET /v1/test/getcrumb HTTP/11" 200 11
+2024-12-22 14:50:45,128 - yfinance - DEBUG - crumb = 'PYJEkAOm0wA'
+2024-12-22 14:50:45,128 - yfinance - DEBUG -    Exiting _get_cookie_and_crumb_basic()
+2024-12-22 14:50:45,128 - yfinance - DEBUG -   Exiting _get_cookie_and_crumb()
+2024-12-22 14:50:45,129 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): query2.finance.yahoo.com:443
+2024-12-22 14:50:45,444 - urllib3.connectionpool - DEBUG - https://query2.finance.yahoo.com:443 "GET /v8/finance/chart/BTC-USD?period1=1732287045&period2=1734879045&interval=1h&includePrePost=False&events=div%2Csplits%2CcapitalGains&crumb=PYJEkAOm0wA HTTP/11" 200 None
+2024-12-22 14:50:45,460 - yfinance - DEBUG - response code=200
+2024-12-22 14:50:45,460 - yfinance - DEBUG -  Exiting get()
+2024-12-22 14:50:45,463 - yfinance - DEBUG - BTC-USD: yfinance received OHLC data: 2024-11-22 14:00:00 -> 2024-12-22 14:00:00
+2024-12-22 14:50:45,470 - yfinance - DEBUG - BTC-USD: OHLC after cleaning: 2024-11-22 14:00:00+00:00 -> 2024-12-22 14:00:00+00:00
+2024-12-22 14:50:45,473 - yfinance - DEBUG - BTC-USD: OHLC after combining events: 2024-11-22 14:00:00+00:00 -> 2024-12-22 14:00:00+00:00
+2024-12-22 14:50:45,476 - yfinance - DEBUG - BTC-USD: yfinance returning OHLC: 2024-11-22 14:00:00+00:00 -> 2024-12-22 14:00:00+00:00
+2024-12-22 14:50:45,476 - yfinance - DEBUG - Exiting history()
+2024-12-22 14:50:45,476 - __main__ - DEBUG - Fetched 721 data points
+2024-12-22 14:50:45,481 - __main__ - DEBUG - Data sample:                                    Open          High           Low         Close    Volume  Dividends  Stock Splits
+Datetime                                                                                                            
+2024-11-22 14:00:00+00:00  97854.367188  98162.593750  97276.460938  97309.890625         0        0.0           0.0
+2024-11-22 15:00:00+00:00  97319.523438  98862.476562  97319.523438  98850.867188         0        0.0           0.0
+2024-11-22 16:00:00+00:00  98807.609375  99100.648438  98366.664062  99081.843750         0        0.0           0.0
+2024-11-22 17:00:00+00:00  98977.031250  99348.156250  98964.460938  98997.242188  52748288        0.0           0.0
+2024-11-22 18:00:00+00:00  98936.750000  99239.882812  98826.218750  99163.210938         0        0.0           0.0
+2024-12-22 14:50:45,512 - __main__ - DEBUG - Added indicators. Available columns: ['Open', 'High', 'Low', 'Close', 'Volume', 'Dividends', 'Stock Splits', 'SMA_20', 'SMA_50', 'EMA_20', 'RSI_14', 'MACD', 'MACD_SIGNAL', 'MACD_HIST', 'BB_UPPER', 'BB_MIDDLE', 'BB_LOWER', 'BB_SQUEEZE', 'STOCH_14', 'STOCH_SIGNAL_14', 'ADX_14', 'ATR_14', 'VWAP', 'OBV', 'PP_FIB_R3', 'PP_FIB_S3', 'PP_FIBONACCI', 'PP_FIBONACCI_R1', 'PP_FIBONACCI_S1', 'PP_FIBONACCI_R2', 'PP_FIBONACCI_S2']
+2024-12-22 14:50:45,525 - __main__ - DEBUG - Indicators sample:                                    Open          High           Low         Close  ...  PP_FIBONACCI_R1  PP_FIBONACCI_S1  PP_FIBONACCI_R2  PP_FIBONACCI_S2
+Datetime                                                                           ...                                                                    
+2024-11-22 14:00:00+00:00  97854.367188  98162.593750  97276.460938  97309.890625  ...     97921.484505     97244.479036     98130.611849     97035.351693
+2024-11-22 15:00:00+00:00  97319.523438  98862.476562  97319.523438  98850.867188  ...     98933.697156     97754.880969     99297.834094     97390.744031
+2024-11-22 16:00:00+00:00  98807.609375  99100.648438  98366.664062  99081.843750  ...     99130.100781     98569.336719     99303.321094     98396.116406
+2024-11-22 17:00:00+00:00  98977.031250  99348.156250  98964.460938  98997.242188  ...     99249.858068     98956.714849     99340.410161     98866.162755
+2024-11-22 18:00:00+00:00  98936.750000  99239.882812  98826.218750  99163.210938  ...     99234.457172     98918.417828     99332.081891     98820.793109
+
+[5 rows x 31 columns]
+2024-12-22 14:50:45,525 - __main__ - INFO - Running backtest for Simple MA strategy
+2024-12-22 14:50:45,559 - __main__ - DEBUG - Completed backtest for Simple MA strategy
+2024-12-22 14:50:45,559 - __main__ - INFO - Running backtest for RSI strategy
+2024-12-22 14:50:45,587 - __main__ - DEBUG - Completed backtest for RSI strategy
+2024-12-22 14:50:45,587 - __main__ - INFO - Running backtest for MACD strategy
+2024-12-22 14:50:45,642 - __main__ - DEBUG - Completed backtest for MACD strategy
+2024-12-22 14:50:45,642 - __main__ - INFO - Running backtest for Combined strategy
+2024-12-22 14:50:45,676 - __main__ - DEBUG - Completed backtest for Combined strategy
+2024-12-22 14:50:45,676 - __main__ - DEBUG - Preparing response with keys: dict_keys(['Simple MA', 'RSI', 'MACD', 'Combined'])
+2024-12-22 14:50:45,681 - __main__ - DEBUG - Successfully created response
+2024-12-22 14:50:45,681 - werkzeug - INFO - 127.0.0.1 - - [22/Dec/2024 14:50:45] "POST /api/backtest HTTP/1.1" 200 -
+2024-12-22 14:51:49,727 - werkzeug - INFO -  * Detected change in '/home/me/btc_backtester/btc_trader/web/app.py', reloading
+2024-12-22 14:51:50,900 - werkzeug - WARNING -  * Debugger is active!
+2024-12-22 14:51:50,901 - werkzeug - INFO -  * Debugger PIN: 733-361-644
+2024-12-22 14:52:12,698 - werkzeug - INFO - 127.0.0.1 - - [22/Dec/2024 14:52:12] "OPTIONS /api/backtest HTTP/1.1" 200 -
+2024-12-22 14:52:12,702 - __main__ - INFO - Received backtest request with parameters: {'period_days': 30, 'interval': '1h', 'initial_capital': 10000, 'stop_loss': 0.02, 'take_profit': 0.05, 'position_size': 0.8}
+2024-12-22 14:52:12,702 - __main__ - INFO - Starting backtest with parameters: period_days=30, interval=1h
+2024-12-22 14:52:12,702 - yfinance - DEBUG - Entering history()
+2024-12-22 14:52:12,703 - peewee - DEBUG - ('CREATE TABLE IF NOT EXISTS "_kv" ("key" VARCHAR(255) NOT NULL PRIMARY KEY, "value" VARCHAR(255)) WITHOUT ROWID', [])
+2024-12-22 14:52:12,703 - peewee - DEBUG - ('SELECT "t1"."key", "t1"."value" FROM "_kv" AS "t1" WHERE ("t1"."key" = ?) LIMIT ? OFFSET ?', ['BTC-USD', 1, 0])
+2024-12-22 14:52:12,704 - yfinance - DEBUG - BTC-USD: Yahoo GET parameters: {'period1': '2024-11-22 14:52:12+00:00', 'period2': '2024-12-22 14:52:12+00:00', 'interval': '1h', 'includePrePost': False, 'events': 'div,splits,capitalGains'}
+2024-12-22 14:52:12,704 - yfinance - DEBUG -  Entering get()
+2024-12-22 14:52:12,704 - yfinance - DEBUG - url=https://query2.finance.yahoo.com/v8/finance/chart/BTC-USD
+2024-12-22 14:52:12,704 - yfinance - DEBUG - params=frozendict.frozendict({'period1': 1732287132, 'period2': 1734879132, 'interval': '1h', 'includePrePost': False, 'events': 'div,splits,capitalGains'})
+2024-12-22 14:52:12,704 - yfinance - DEBUG -   Entering _get_cookie_and_crumb()
+2024-12-22 14:52:12,704 - yfinance - DEBUG - cookie_mode = 'basic'
+2024-12-22 14:52:12,704 - yfinance - DEBUG -    Entering _get_cookie_and_crumb_basic()
+2024-12-22 14:52:12,704 - peewee - DEBUG - ('CREATE TABLE IF NOT EXISTS "_cookieschema" ("strategy" VARCHAR(255) NOT NULL PRIMARY KEY, "fetch_date" DATETIME NOT NULL, "cookie_bytes" BLOB NOT NULL) WITHOUT ROWID', [])
+2024-12-22 14:52:12,705 - peewee - DEBUG - ('SELECT "t1"."strategy", "t1"."fetch_date", "t1"."cookie_bytes" FROM "_cookieschema" AS "t1" WHERE ("t1"."strategy" = ?) LIMIT ? OFFSET ?', ['basic', 1, 0])
+2024-12-22 14:52:12,705 - yfinance - DEBUG - loaded persistent cookie
+2024-12-22 14:52:12,705 - yfinance - DEBUG - reusing cookie
+2024-12-22 14:52:12,706 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): query1.finance.yahoo.com:443
+2024-12-22 14:52:13,405 - urllib3.connectionpool - DEBUG - https://query1.finance.yahoo.com:443 "GET /v1/test/getcrumb HTTP/11" 200 11
+2024-12-22 14:52:13,406 - yfinance - DEBUG - crumb = 'PYJEkAOm0wA'
+2024-12-22 14:52:13,406 - yfinance - DEBUG -    Exiting _get_cookie_and_crumb_basic()
+2024-12-22 14:52:13,406 - yfinance - DEBUG -   Exiting _get_cookie_and_crumb()
+2024-12-22 14:52:13,407 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): query2.finance.yahoo.com:443
+2024-12-22 14:52:13,812 - urllib3.connectionpool - DEBUG - https://query2.finance.yahoo.com:443 "GET /v8/finance/chart/BTC-USD?period1=1732287132&period2=1734879132&interval=1h&includePrePost=False&events=div%2Csplits%2CcapitalGains&crumb=PYJEkAOm0wA HTTP/11" 200 None
+2024-12-22 14:52:13,827 - yfinance - DEBUG - response code=200
+2024-12-22 14:52:13,827 - yfinance - DEBUG -  Exiting get()
+2024-12-22 14:52:13,829 - yfinance - DEBUG - BTC-USD: yfinance received OHLC data: 2024-11-22 14:00:00 -> 2024-12-22 14:00:00
+2024-12-22 14:52:13,833 - yfinance - DEBUG - BTC-USD: OHLC after cleaning: 2024-11-22 14:00:00+00:00 -> 2024-12-22 14:00:00+00:00
+2024-12-22 14:52:13,836 - yfinance - DEBUG - BTC-USD: OHLC after combining events: 2024-11-22 14:00:00+00:00 -> 2024-12-22 14:00:00+00:00
+2024-12-22 14:52:13,838 - yfinance - DEBUG - BTC-USD: yfinance returning OHLC: 2024-11-22 14:00:00+00:00 -> 2024-12-22 14:00:00+00:00
+2024-12-22 14:52:13,838 - yfinance - DEBUG - Exiting history()
+2024-12-22 14:52:13,838 - __main__ - DEBUG - Fetched 721 data points
+2024-12-22 14:52:13,844 - __main__ - DEBUG - Data sample:                                    Open          High           Low         Close    Volume  Dividends  Stock Splits
+Datetime                                                                                                            
+2024-11-22 14:00:00+00:00  97854.367188  98162.593750  97276.460938  97309.890625         0        0.0           0.0
+2024-11-22 15:00:00+00:00  97319.523438  98862.476562  97319.523438  98850.867188         0        0.0           0.0
+2024-11-22 16:00:00+00:00  98807.609375  99100.648438  98366.664062  99081.843750         0        0.0           0.0
+2024-11-22 17:00:00+00:00  98977.031250  99348.156250  98964.460938  98997.242188  52748288        0.0           0.0
+2024-11-22 18:00:00+00:00  98936.750000  99239.882812  98826.218750  99163.210938         0        0.0           0.0
+2024-12-22 14:52:13,870 - __main__ - DEBUG - Added indicators. Available columns: ['Open', 'High', 'Low', 'Close', 'Volume', 'Dividends', 'Stock Splits', 'SMA_20', 'SMA_50', 'EMA_20', 'RSI_14', 'MACD', 'MACD_SIGNAL', 'MACD_HIST', 'BB_UPPER', 'BB_MIDDLE', 'BB_LOWER', 'BB_SQUEEZE', 'STOCH_14', 'STOCH_SIGNAL_14', 'ADX_14', 'ATR_14', 'VWAP', 'OBV', 'PP_FIB_R3', 'PP_FIB_S3', 'PP_FIBONACCI', 'PP_FIBONACCI_R1', 'PP_FIBONACCI_S1', 'PP_FIBONACCI_R2', 'PP_FIBONACCI_S2']
+2024-12-22 14:52:13,880 - __main__ - DEBUG - Indicators sample:                                    Open          High           Low         Close  ...  PP_FIBONACCI_R1  PP_FIBONACCI_S1  PP_FIBONACCI_R2  PP_FIBONACCI_S2
+Datetime                                                                           ...                                                                    
+2024-11-22 14:00:00+00:00  97854.367188  98162.593750  97276.460938  97309.890625  ...     97921.484505     97244.479036     98130.611849     97035.351693
+2024-11-22 15:00:00+00:00  97319.523438  98862.476562  97319.523438  98850.867188  ...     98933.697156     97754.880969     99297.834094     97390.744031
+2024-11-22 16:00:00+00:00  98807.609375  99100.648438  98366.664062  99081.843750  ...     99130.100781     98569.336719     99303.321094     98396.116406
+2024-11-22 17:00:00+00:00  98977.031250  99348.156250  98964.460938  98997.242188  ...     99249.858068     98956.714849     99340.410161     98866.162755
+2024-11-22 18:00:00+00:00  98936.750000  99239.882812  98826.218750  99163.210938  ...     99234.457172     98918.417828     99332.081891     98820.793109
+
+[5 rows x 31 columns]
+2024-12-22 14:52:13,880 - __main__ - INFO - Running backtest for Simple MA strategy
+2024-12-22 14:52:13,911 - __main__ - DEBUG - Completed backtest for Simple MA strategy
+2024-12-22 14:52:13,911 - __main__ - INFO - Running backtest for RSI strategy
+2024-12-22 14:52:13,944 - __main__ - DEBUG - Completed backtest for RSI strategy
+2024-12-22 14:52:13,944 - __main__ - INFO - Running backtest for MACD strategy
+2024-12-22 14:52:13,995 - __main__ - DEBUG - Completed backtest for MACD strategy
+2024-12-22 14:52:13,996 - __main__ - INFO - Running backtest for Combined strategy
+2024-12-22 14:52:14,029 - __main__ - DEBUG - Completed backtest for Combined strategy
+2024-12-22 14:52:14,029 - __main__ - DEBUG - Preparing response with keys: dict_keys(['Simple MA', 'RSI', 'MACD', 'Combined'])
+2024-12-22 14:52:14,034 - __main__ - DEBUG - Successfully created response
+2024-12-22 14:52:14,034 - werkzeug - INFO - 127.0.0.1 - - [22/Dec/2024 14:52:14] "POST /api/backtest HTTP/1.1" 200 -
+2024-12-22 14:54:04,684 - werkzeug - INFO -  * Detected change in '/home/me/btc_backtester/btc_trader/web/app.py', reloading
+2024-12-22 14:54:05,569 - werkzeug - WARNING -  * Debugger is active!
+2024-12-22 14:54:05,570 - werkzeug - INFO -  * Debugger PIN: 733-361-644
+2024-12-22 14:56:30,690 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2024-12-22 14:56:30,690 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2024-12-22 14:56:30,691 - werkzeug - INFO -  * Restarting with stat
+2024-12-22 14:56:31,363 - werkzeug - WARNING -  * Debugger is active!
+2024-12-22 14:56:31,364 - werkzeug - INFO -  * Debugger PIN: 733-361-644
+2024-12-22 14:56:31,513 - werkzeug - INFO - 127.0.0.1 - - [22/Dec/2024 14:56:31] "[33mGET / HTTP/1.1[0m" 404 -
+2024-12-22 14:56:45,874 - werkzeug - INFO - 127.0.0.1 - - [22/Dec/2024 14:56:45] "OPTIONS /api/backtest HTTP/1.1" 200 -
+2024-12-22 14:56:45,875 - __main__ - INFO - Received backtest request with parameters: {'period_days': 30, 'interval': '1h', 'initial_capital': 10000, 'stop_loss': 0.02, 'take_profit': 0.05, 'position_size': 0.8}
+2024-12-22 14:56:45,875 - __main__ - INFO - Starting backtest with parameters: period_days=30, interval=1h
+2024-12-22 14:56:45,876 - yfinance - DEBUG - Entering history()
+2024-12-22 14:56:45,877 - peewee - DEBUG - ('CREATE TABLE IF NOT EXISTS "_kv" ("key" VARCHAR(255) NOT NULL PRIMARY KEY, "value" VARCHAR(255)) WITHOUT ROWID', [])
+2024-12-22 14:56:45,877 - peewee - DEBUG - ('SELECT "t1"."key", "t1"."value" FROM "_kv" AS "t1" WHERE ("t1"."key" = ?) LIMIT ? OFFSET ?', ['BTC-USD', 1, 0])
+2024-12-22 14:56:45,878 - yfinance - DEBUG - BTC-USD: Yahoo GET parameters: {'period1': '2024-11-22 14:56:45+00:00', 'period2': '2024-12-22 14:56:45+00:00', 'interval': '1h', 'includePrePost': False, 'events': 'div,splits,capitalGains'}
+2024-12-22 14:56:45,878 - yfinance - DEBUG -  Entering get()
+2024-12-22 14:56:45,878 - yfinance - DEBUG - url=https://query2.finance.yahoo.com/v8/finance/chart/BTC-USD
+2024-12-22 14:56:45,878 - yfinance - DEBUG - params=frozendict.frozendict({'period1': 1732287405, 'period2': 1734879405, 'interval': '1h', 'includePrePost': False, 'events': 'div,splits,capitalGains'})
+2024-12-22 14:56:45,878 - yfinance - DEBUG -   Entering _get_cookie_and_crumb()
+2024-12-22 14:56:45,878 - yfinance - DEBUG - cookie_mode = 'basic'
+2024-12-22 14:56:45,878 - yfinance - DEBUG -    Entering _get_cookie_and_crumb_basic()
+2024-12-22 14:56:45,879 - peewee - DEBUG - ('CREATE TABLE IF NOT EXISTS "_cookieschema" ("strategy" VARCHAR(255) NOT NULL PRIMARY KEY, "fetch_date" DATETIME NOT NULL, "cookie_bytes" BLOB NOT NULL) WITHOUT ROWID', [])
+2024-12-22 14:56:45,879 - peewee - DEBUG - ('SELECT "t1"."strategy", "t1"."fetch_date", "t1"."cookie_bytes" FROM "_cookieschema" AS "t1" WHERE ("t1"."strategy" = ?) LIMIT ? OFFSET ?', ['basic', 1, 0])
+2024-12-22 14:56:45,879 - yfinance - DEBUG - loaded persistent cookie
+2024-12-22 14:56:45,879 - yfinance - DEBUG - reusing cookie
+2024-12-22 14:56:45,881 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): query1.finance.yahoo.com:443
+2024-12-22 14:56:46,196 - urllib3.connectionpool - DEBUG - https://query1.finance.yahoo.com:443 "GET /v1/test/getcrumb HTTP/11" 200 11
+2024-12-22 14:56:46,196 - yfinance - DEBUG - crumb = 'PYJEkAOm0wA'
+2024-12-22 14:56:46,197 - yfinance - DEBUG -    Exiting _get_cookie_and_crumb_basic()
+2024-12-22 14:56:46,197 - yfinance - DEBUG -   Exiting _get_cookie_and_crumb()
+2024-12-22 14:56:46,198 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): query2.finance.yahoo.com:443
+2024-12-22 14:56:47,020 - urllib3.connectionpool - DEBUG - https://query2.finance.yahoo.com:443 "GET /v8/finance/chart/BTC-USD?period1=1732287405&period2=1734879405&interval=1h&includePrePost=False&events=div%2Csplits%2CcapitalGains&crumb=PYJEkAOm0wA HTTP/11" 200 None
+2024-12-22 14:56:47,036 - yfinance - DEBUG - response code=200
+2024-12-22 14:56:47,036 - yfinance - DEBUG -  Exiting get()
+2024-12-22 14:56:47,040 - yfinance - DEBUG - BTC-USD: yfinance received OHLC data: 2024-11-22 14:00:00 -> 2024-12-22 14:00:00
+2024-12-22 14:56:47,044 - yfinance - DEBUG - BTC-USD: OHLC after cleaning: 2024-11-22 14:00:00+00:00 -> 2024-12-22 14:00:00+00:00
+2024-12-22 14:56:47,047 - yfinance - DEBUG - BTC-USD: OHLC after combining events: 2024-11-22 14:00:00+00:00 -> 2024-12-22 14:00:00+00:00
+2024-12-22 14:56:47,050 - yfinance - DEBUG - BTC-USD: yfinance returning OHLC: 2024-11-22 14:00:00+00:00 -> 2024-12-22 14:00:00+00:00
+2024-12-22 14:56:47,050 - yfinance - DEBUG - Exiting history()
+2024-12-22 14:56:47,050 - __main__ - DEBUG - Fetched 721 data points
+2024-12-22 14:56:47,054 - __main__ - DEBUG - Data sample:                                    Open          High           Low         Close    Volume  Dividends  Stock Splits
+Datetime                                                                                                            
+2024-11-22 14:00:00+00:00  97854.367188  98162.593750  97276.460938  97309.890625         0        0.0           0.0
+2024-11-22 15:00:00+00:00  97319.523438  98862.476562  97319.523438  98850.867188         0        0.0           0.0
+2024-11-22 16:00:00+00:00  98807.609375  99100.648438  98366.664062  99081.843750         0        0.0           0.0
+2024-11-22 17:00:00+00:00  98977.031250  99348.156250  98964.460938  98997.242188  52748288        0.0           0.0
+2024-11-22 18:00:00+00:00  98936.750000  99239.882812  98826.218750  99163.210938         0        0.0           0.0
+2024-12-22 14:56:47,080 - __main__ - DEBUG - Added indicators. Available columns: ['Open', 'High', 'Low', 'Close', 'Volume', 'Dividends', 'Stock Splits', 'SMA_20', 'SMA_50', 'EMA_20', 'RSI_14', 'MACD', 'MACD_SIGNAL', 'MACD_HIST', 'BB_UPPER', 'BB_MIDDLE', 'BB_LOWER', 'BB_SQUEEZE', 'STOCH_14', 'STOCH_SIGNAL_14', 'ADX_14', 'ATR_14', 'VWAP', 'OBV', 'PP_FIB_R3', 'PP_FIB_S3', 'PP_FIBONACCI', 'PP_FIBONACCI_R1', 'PP_FIBONACCI_S1', 'PP_FIBONACCI_R2', 'PP_FIBONACCI_S2']
+2024-12-22 14:56:47,091 - __main__ - DEBUG - Indicators sample:                                    Open          High           Low         Close  ...  PP_FIBONACCI_R1  PP_FIBONACCI_S1  PP_FIBONACCI_R2  PP_FIBONACCI_S2
+Datetime                                                                           ...                                                                    
+2024-11-22 14:00:00+00:00  97854.367188  98162.593750  97276.460938  97309.890625  ...     97921.484505     97244.479036     98130.611849     97035.351693
+2024-11-22 15:00:00+00:00  97319.523438  98862.476562  97319.523438  98850.867188  ...     98933.697156     97754.880969     99297.834094     97390.744031
+2024-11-22 16:00:00+00:00  98807.609375  99100.648438  98366.664062  99081.843750  ...     99130.100781     98569.336719     99303.321094     98396.116406
+2024-11-22 17:00:00+00:00  98977.031250  99348.156250  98964.460938  98997.242188  ...     99249.858068     98956.714849     99340.410161     98866.162755
+2024-11-22 18:00:00+00:00  98936.750000  99239.882812  98826.218750  99163.210938  ...     99234.457172     98918.417828     99332.081891     98820.793109
+
+[5 rows x 31 columns]
+2024-12-22 14:56:47,091 - __main__ - INFO - Running backtest for Simple MA strategy
+2024-12-22 14:56:47,124 - __main__ - DEBUG - Completed backtest for Simple MA strategy
+2024-12-22 14:56:47,125 - __main__ - INFO - Running backtest for RSI strategy
+2024-12-22 14:56:47,153 - __main__ - DEBUG - Completed backtest for RSI strategy
+2024-12-22 14:56:47,153 - __main__ - INFO - Running backtest for MACD strategy
+2024-12-22 14:56:47,208 - __main__ - DEBUG - Completed backtest for MACD strategy
+2024-12-22 14:56:47,208 - __main__ - INFO - Running backtest for Combined strategy
+2024-12-22 14:56:47,241 - __main__ - DEBUG - Completed backtest for Combined strategy
+2024-12-22 14:56:47,241 - __main__ - DEBUG - Preparing response with keys: dict_keys(['Simple MA', 'RSI', 'MACD', 'Combined'])
+2024-12-22 14:56:47,252 - werkzeug - INFO - 127.0.0.1 - - [22/Dec/2024 14:56:47] "POST /api/backtest HTTP/1.1" 200 -
+2024-12-22 14:59:04,119 - werkzeug - INFO -  * Detected change in '/home/me/btc_backtester/btc_trader/web/app.py', reloading
+2024-12-22 14:59:04,294 - werkzeug - INFO -  * Restarting with stat
+2024-12-22 14:59:05,003 - werkzeug - WARNING -  * Debugger is active!
+2024-12-22 14:59:05,004 - werkzeug - INFO -  * Debugger PIN: 733-361-644
+2024-12-22 15:09:15,437 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2024-12-22 15:09:15,437 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2024-12-22 15:09:15,437 - werkzeug - INFO -  * Restarting with stat
+2024-12-22 15:09:16,249 - werkzeug - WARNING -  * Debugger is active!
+2024-12-22 15:09:16,249 - werkzeug - INFO -  * Debugger PIN: 733-361-644
+2024-12-22 15:09:16,449 - werkzeug - INFO - 127.0.0.1 - - [22/Dec/2024 15:09:16] "[33mGET / HTTP/1.1[0m" 404 -
+2024-12-22 15:09:29,000 - __main__ - INFO - Received backtest request with parameters: {'period_days': 30, 'interval': '1h', 'initial_capital': 10000, 'stop_loss': 0.02, 'take_profit': 0.05, 'position_size': 0.8}
+2024-12-22 15:09:29,000 - btc_trader.services.backtest_service - INFO - Starting backtest with parameters: period_days=30, interval=1h
+2024-12-22 15:09:29,000 - yfinance - DEBUG - Entering history()
+2024-12-22 15:09:29,001 - peewee - DEBUG - ('CREATE TABLE IF NOT EXISTS "_kv" ("key" VARCHAR(255) NOT NULL PRIMARY KEY, "value" VARCHAR(255)) WITHOUT ROWID', [])
+2024-12-22 15:09:29,001 - peewee - DEBUG - ('SELECT "t1"."key", "t1"."value" FROM "_kv" AS "t1" WHERE ("t1"."key" = ?) LIMIT ? OFFSET ?', ['BTC-USD', 1, 0])
+2024-12-22 15:09:29,002 - yfinance - DEBUG - BTC-USD: Yahoo GET parameters: {'period1': '2024-11-22 15:09:29+00:00', 'period2': '2024-12-22 15:09:29+00:00', 'interval': '1h', 'includePrePost': False, 'events': 'div,splits,capitalGains'}
+2024-12-22 15:09:29,002 - yfinance - DEBUG -  Entering get()
+2024-12-22 15:09:29,002 - yfinance - DEBUG - url=https://query2.finance.yahoo.com/v8/finance/chart/BTC-USD
+2024-12-22 15:09:29,002 - yfinance - DEBUG - params=frozendict.frozendict({'period1': 1732288169, 'period2': 1734880169, 'interval': '1h', 'includePrePost': False, 'events': 'div,splits,capitalGains'})
+2024-12-22 15:09:29,002 - yfinance - DEBUG -   Entering _get_cookie_and_crumb()
+2024-12-22 15:09:29,002 - yfinance - DEBUG - cookie_mode = 'basic'
+2024-12-22 15:09:29,002 - yfinance - DEBUG -    Entering _get_cookie_and_crumb_basic()
+2024-12-22 15:09:29,003 - peewee - DEBUG - ('CREATE TABLE IF NOT EXISTS "_cookieschema" ("strategy" VARCHAR(255) NOT NULL PRIMARY KEY, "fetch_date" DATETIME NOT NULL, "cookie_bytes" BLOB NOT NULL) WITHOUT ROWID', [])
+2024-12-22 15:09:29,003 - peewee - DEBUG - ('SELECT "t1"."strategy", "t1"."fetch_date", "t1"."cookie_bytes" FROM "_cookieschema" AS "t1" WHERE ("t1"."strategy" = ?) LIMIT ? OFFSET ?', ['basic', 1, 0])
+2024-12-22 15:09:29,003 - yfinance - DEBUG - loaded persistent cookie
+2024-12-22 15:09:29,003 - yfinance - DEBUG - reusing cookie
+2024-12-22 15:09:29,004 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): query1.finance.yahoo.com:443
+2024-12-22 15:09:29,094 - urllib3.connectionpool - DEBUG - https://query1.finance.yahoo.com:443 "GET /v1/test/getcrumb HTTP/11" 200 11
+2024-12-22 15:09:29,094 - yfinance - DEBUG - crumb = 'PYJEkAOm0wA'
+2024-12-22 15:09:29,094 - yfinance - DEBUG -    Exiting _get_cookie_and_crumb_basic()
+2024-12-22 15:09:29,094 - yfinance - DEBUG -   Exiting _get_cookie_and_crumb()
+2024-12-22 15:09:29,096 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): query2.finance.yahoo.com:443
+2024-12-22 15:09:29,209 - urllib3.connectionpool - DEBUG - https://query2.finance.yahoo.com:443 "GET /v8/finance/chart/BTC-USD?period1=1732288169&period2=1734880169&interval=1h&includePrePost=False&events=div%2Csplits%2CcapitalGains&crumb=PYJEkAOm0wA HTTP/11" 200 None
+2024-12-22 15:09:29,227 - yfinance - DEBUG - response code=200
+2024-12-22 15:09:29,227 - yfinance - DEBUG -  Exiting get()
+2024-12-22 15:09:29,231 - yfinance - DEBUG - BTC-USD: yfinance received OHLC data: 2024-11-22 15:00:00 -> 2024-12-22 15:00:00
+2024-12-22 15:09:29,238 - yfinance - DEBUG - BTC-USD: OHLC after cleaning: 2024-11-22 15:00:00+00:00 -> 2024-12-22 15:00:00+00:00
+2024-12-22 15:09:29,241 - yfinance - DEBUG - BTC-USD: OHLC after combining events: 2024-11-22 15:00:00+00:00 -> 2024-12-22 15:00:00+00:00
+2024-12-22 15:09:29,244 - yfinance - DEBUG - BTC-USD: yfinance returning OHLC: 2024-11-22 15:00:00+00:00 -> 2024-12-22 15:00:00+00:00
+2024-12-22 15:09:29,245 - yfinance - DEBUG - Exiting history()
+2024-12-22 15:09:29,255 - btc_trader.services.backtest_service - INFO - Running backtest for SimpleMAStrategy strategy
+2024-12-22 15:09:29,255 - btc_trader.services.backtest_service - ERROR - Error in strategy SimpleMAStrategy: Can't instantiate abstract class SimpleMAStrategy with abstract method backtest
+2024-12-22 15:09:29,255 - btc_trader.services.backtest_service - INFO - Running backtest for RSIStrategy strategy
+2024-12-22 15:09:29,255 - btc_trader.services.backtest_service - ERROR - Error in strategy RSIStrategy: Can't instantiate abstract class RSIStrategy with abstract method backtest
+2024-12-22 15:09:29,255 - btc_trader.services.backtest_service - INFO - Running backtest for MACDStrategy strategy
+2024-12-22 15:09:29,256 - btc_trader.services.backtest_service - ERROR - Error in strategy MACDStrategy: Can't instantiate abstract class MACDStrategy with abstract method backtest
+2024-12-22 15:09:29,256 - btc_trader.services.backtest_service - INFO - Running backtest for CombinedStrategy strategy
+2024-12-22 15:09:29,256 - btc_trader.services.backtest_service - ERROR - Error in strategy CombinedStrategy: Can't instantiate abstract class CombinedStrategy with abstract method backtest
+2024-12-22 15:09:29,256 - __main__ - DEBUG - Preparing response with keys: ['SimpleMAStrategy', 'RSIStrategy', 'MACDStrategy', 'CombinedStrategy']
+2024-12-22 15:09:29,256 - werkzeug - INFO - 127.0.0.1 - - [22/Dec/2024 15:09:29] "POST /api/backtest HTTP/1.1" 200 -
+2024-12-22 15:09:57,092 - __main__ - INFO - Received backtest request with parameters: {'period_days': 30, 'interval': '1h', 'initial_capital': 10000, 'stop_loss': 0.02, 'take_profit': 0.05, 'position_size': 0.8}
+2024-12-22 15:09:57,092 - btc_trader.services.backtest_service - INFO - Starting backtest with parameters: period_days=30, interval=1h
+2024-12-22 15:09:57,092 - btc_trader.services.backtest_service - INFO - Running backtest for SimpleMAStrategy strategy
+2024-12-22 15:09:57,092 - btc_trader.services.backtest_service - ERROR - Error in strategy SimpleMAStrategy: Can't instantiate abstract class SimpleMAStrategy with abstract method backtest
+2024-12-22 15:09:57,092 - btc_trader.services.backtest_service - INFO - Running backtest for RSIStrategy strategy
+2024-12-22 15:09:57,092 - btc_trader.services.backtest_service - ERROR - Error in strategy RSIStrategy: Can't instantiate abstract class RSIStrategy with abstract method backtest
+2024-12-22 15:09:57,092 - btc_trader.services.backtest_service - INFO - Running backtest for MACDStrategy strategy
+2024-12-22 15:09:57,093 - btc_trader.services.backtest_service - ERROR - Error in strategy MACDStrategy: Can't instantiate abstract class MACDStrategy with abstract method backtest
+2024-12-22 15:09:57,093 - btc_trader.services.backtest_service - INFO - Running backtest for CombinedStrategy strategy
+2024-12-22 15:09:57,093 - btc_trader.services.backtest_service - ERROR - Error in strategy CombinedStrategy: Can't instantiate abstract class CombinedStrategy with abstract method backtest
+2024-12-22 15:09:57,093 - __main__ - DEBUG - Preparing response with keys: ['SimpleMAStrategy', 'RSIStrategy', 'MACDStrategy', 'CombinedStrategy']
+2024-12-22 15:09:57,093 - werkzeug - INFO - 127.0.0.1 - - [22/Dec/2024 15:09:57] "POST /api/backtest HTTP/1.1" 200 -
+2024-12-22 15:10:12,608 - werkzeug - INFO -  * Detected change in '/home/me/btc_backtester/btc_trader/strategies/base_strategy.py', reloading
+2024-12-22 15:10:12,756 - werkzeug - INFO -  * Restarting with stat
+2024-12-22 15:10:13,627 - werkzeug - WARNING -  * Debugger is active!
+2024-12-22 15:10:13,628 - werkzeug - INFO -  * Debugger PIN: 733-361-644
+2024-12-22 15:10:15,069 - werkzeug - INFO -  * Detected change in '/home/me/btc_backtester/btc_trader/strategies/simple_ma_strategy.py', reloading
+2024-12-22 15:10:15,210 - werkzeug - INFO -  * Restarting with stat
+2024-12-22 15:10:15,904 - werkzeug - WARNING -  * Debugger is active!
+2024-12-22 15:10:15,904 - werkzeug - INFO -  * Debugger PIN: 733-361-644
+2024-12-22 15:10:30,216 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2024-12-22 15:10:30,216 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2024-12-22 15:10:30,216 - werkzeug - INFO -  * Restarting with stat
+2024-12-22 15:10:30,919 - werkzeug - WARNING -  * Debugger is active!
+2024-12-22 15:10:30,920 - werkzeug - INFO -  * Debugger PIN: 733-361-644
+2024-12-22 15:10:31,077 - werkzeug - INFO - 127.0.0.1 - - [22/Dec/2024 15:10:31] "[33mGET / HTTP/1.1[0m" 404 -
+2024-12-22 15:10:43,128 - __main__ - INFO - Received backtest request with parameters: {'period_days': 30, 'interval': '1h', 'initial_capital': 10000, 'stop_loss': 0.02, 'take_profit': 0.05, 'position_size': 0.8}
+2024-12-22 15:10:43,128 - btc_trader.services.backtest_service - INFO - Starting backtest with parameters: period_days=30, interval=1h
+2024-12-22 15:10:43,129 - yfinance - DEBUG - Entering history()
+2024-12-22 15:10:43,129 - peewee - DEBUG - ('CREATE TABLE IF NOT EXISTS "_kv" ("key" VARCHAR(255) NOT NULL PRIMARY KEY, "value" VARCHAR(255)) WITHOUT ROWID', [])
+2024-12-22 15:10:43,130 - peewee - DEBUG - ('SELECT "t1"."key", "t1"."value" FROM "_kv" AS "t1" WHERE ("t1"."key" = ?) LIMIT ? OFFSET ?', ['BTC-USD', 1, 0])
+2024-12-22 15:10:43,130 - yfinance - DEBUG - BTC-USD: Yahoo GET parameters: {'period1': '2024-11-22 15:10:43+00:00', 'period2': '2024-12-22 15:10:43+00:00', 'interval': '1h', 'includePrePost': False, 'events': 'div,splits,capitalGains'}
+2024-12-22 15:10:43,131 - yfinance - DEBUG -  Entering get()
+2024-12-22 15:10:43,131 - yfinance - DEBUG - url=https://query2.finance.yahoo.com/v8/finance/chart/BTC-USD
+2024-12-22 15:10:43,131 - yfinance - DEBUG - params=frozendict.frozendict({'period1': 1732288243, 'period2': 1734880243, 'interval': '1h', 'includePrePost': False, 'events': 'div,splits,capitalGains'})
+2024-12-22 15:10:43,131 - yfinance - DEBUG -   Entering _get_cookie_and_crumb()
+2024-12-22 15:10:43,131 - yfinance - DEBUG - cookie_mode = 'basic'
+2024-12-22 15:10:43,131 - yfinance - DEBUG -    Entering _get_cookie_and_crumb_basic()
+2024-12-22 15:10:43,131 - peewee - DEBUG - ('CREATE TABLE IF NOT EXISTS "_cookieschema" ("strategy" VARCHAR(255) NOT NULL PRIMARY KEY, "fetch_date" DATETIME NOT NULL, "cookie_bytes" BLOB NOT NULL) WITHOUT ROWID', [])
+2024-12-22 15:10:43,131 - peewee - DEBUG - ('SELECT "t1"."strategy", "t1"."fetch_date", "t1"."cookie_bytes" FROM "_cookieschema" AS "t1" WHERE ("t1"."strategy" = ?) LIMIT ? OFFSET ?', ['basic', 1, 0])
+2024-12-22 15:10:43,132 - yfinance - DEBUG - loaded persistent cookie
+2024-12-22 15:10:43,132 - yfinance - DEBUG - reusing cookie
+2024-12-22 15:10:43,133 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): query1.finance.yahoo.com:443
+2024-12-22 15:10:43,938 - urllib3.connectionpool - DEBUG - https://query1.finance.yahoo.com:443 "GET /v1/test/getcrumb HTTP/11" 200 11
+2024-12-22 15:10:43,939 - yfinance - DEBUG - crumb = 'PYJEkAOm0wA'
+2024-12-22 15:10:43,939 - yfinance - DEBUG -    Exiting _get_cookie_and_crumb_basic()
+2024-12-22 15:10:43,939 - yfinance - DEBUG -   Exiting _get_cookie_and_crumb()
+2024-12-22 15:10:43,940 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): query2.finance.yahoo.com:443
+2024-12-22 15:10:44,551 - urllib3.connectionpool - DEBUG - https://query2.finance.yahoo.com:443 "GET /v8/finance/chart/BTC-USD?period1=1732288243&period2=1734880243&interval=1h&includePrePost=False&events=div%2Csplits%2CcapitalGains&crumb=PYJEkAOm0wA HTTP/11" 200 None
+2024-12-22 15:10:44,604 - yfinance - DEBUG - response code=200
+2024-12-22 15:10:44,604 - yfinance - DEBUG -  Exiting get()
+2024-12-22 15:10:44,608 - yfinance - DEBUG - BTC-USD: yfinance received OHLC data: 2024-11-22 15:00:00 -> 2024-12-22 15:00:00
+2024-12-22 15:10:44,613 - yfinance - DEBUG - BTC-USD: OHLC after cleaning: 2024-11-22 15:00:00+00:00 -> 2024-12-22 15:00:00+00:00
+2024-12-22 15:10:44,615 - yfinance - DEBUG - BTC-USD: OHLC after combining events: 2024-11-22 15:00:00+00:00 -> 2024-12-22 15:00:00+00:00
+2024-12-22 15:10:44,617 - yfinance - DEBUG - BTC-USD: yfinance returning OHLC: 2024-11-22 15:00:00+00:00 -> 2024-12-22 15:00:00+00:00
+2024-12-22 15:10:44,617 - yfinance - DEBUG - Exiting history()
+2024-12-22 15:10:44,617 - btc_trader.services.backtest_service - ERROR - Error in run_backtest: 'dict' object has no attribute 'short_window'
+2024-12-22 15:10:44,617 - __main__ - ERROR - Error in backtest endpoint: 'dict' object has no attribute 'short_window'
+2024-12-22 15:10:44,617 - __main__ - ERROR - Traceback (most recent call last):
+  File "/home/me/btc_backtester/btc_trader/web/app.py", line 116, in backtest
+    results = backtest_service.run_backtest(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/me/btc_backtester/btc_trader/services/backtest_service.py", line 91, in run_backtest
+    data = self._prepare_data(period_days, interval)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/me/btc_backtester/btc_trader/services/backtest_service.py", line 35, in _prepare_data
+    strategy_indicators = strategy_class.get_required_indicators({})
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/me/btc_backtester/btc_trader/strategies/simple_ma_strategy.py", line 56, in get_required_indicators
+    'SMA': [self.short_window, self.long_window]
+            ^^^^^^^^^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'short_window'
+
+2024-12-22 15:10:44,618 - werkzeug - INFO - 127.0.0.1 - - [22/Dec/2024 15:10:44] "[35m[1mPOST /api/backtest HTTP/1.1[0m" 500 -
+2024-12-22 15:12:18,056 - werkzeug - INFO -  * Detected change in '/home/me/btc_backtester/btc_trader/strategies/simple_ma_strategy.py', reloading
+2024-12-22 15:12:18,201 - werkzeug - INFO -  * Restarting with stat
+2024-12-22 15:12:18,944 - werkzeug - WARNING -  * Debugger is active!
+2024-12-22 15:12:18,945 - werkzeug - INFO -  * Debugger PIN: 733-361-644
+2024-12-22 15:13:00,022 - werkzeug - INFO -  * Detected change in '/home/me/btc_backtester/btc_trader/strategies/base_strategy.py', reloading
+2024-12-22 15:13:00,158 - werkzeug - INFO -  * Restarting with stat
+2024-12-22 15:13:00,885 - werkzeug - WARNING -  * Debugger is active!
+2024-12-22 15:13:00,885 - werkzeug - INFO -  * Debugger PIN: 733-361-644
+2024-12-22 15:14:18,783 - werkzeug - INFO -  * Detected change in '/home/me/btc_backtester/btc_trader/strategies/simple_ma_strategy.py', reloading
+2024-12-22 15:14:18,940 - werkzeug - INFO -  * Restarting with stat
+2024-12-22 15:14:19,757 - werkzeug - WARNING -  * Debugger is active!
+2024-12-22 15:14:19,757 - werkzeug - INFO -  * Debugger PIN: 733-361-644
+2024-12-22 15:14:40,790 - werkzeug - INFO -  * Detected change in '/home/me/btc_backtester/btc_trader/strategies/strategy_registry.py', reloading
+2024-12-22 15:14:40,937 - werkzeug - INFO -  * Restarting with stat
+2024-12-22 15:14:41,594 - werkzeug - WARNING -  * Debugger is active!
+2024-12-22 15:14:41,594 - werkzeug - INFO -  * Debugger PIN: 733-361-644
+2024-12-22 15:15:32,716 - __main__ - INFO - Received backtest request with parameters: {'period_days': 30, 'interval': '1h', 'initial_capital': 10000, 'stop_loss': 0.02, 'take_profit': 0.05, 'position_size': 0.8}
+2024-12-22 15:15:32,716 - btc_trader.services.backtest_service - INFO - Starting backtest with parameters: period_days=30, interval=1h
+2024-12-22 15:15:32,716 - yfinance - DEBUG - Entering history()
+2024-12-22 15:15:32,717 - peewee - DEBUG - ('CREATE TABLE IF NOT EXISTS "_kv" ("key" VARCHAR(255) NOT NULL PRIMARY KEY, "value" VARCHAR(255)) WITHOUT ROWID', [])
+2024-12-22 15:15:32,718 - peewee - DEBUG - ('SELECT "t1"."key", "t1"."value" FROM "_kv" AS "t1" WHERE ("t1"."key" = ?) LIMIT ? OFFSET ?', ['BTC-USD', 1, 0])
+2024-12-22 15:15:32,718 - yfinance - DEBUG - BTC-USD: Yahoo GET parameters: {'period1': '2024-11-22 15:15:32+00:00', 'period2': '2024-12-22 15:15:32+00:00', 'interval': '1h', 'includePrePost': False, 'events': 'div,splits,capitalGains'}
+2024-12-22 15:15:32,718 - yfinance - DEBUG -  Entering get()
+2024-12-22 15:15:32,718 - yfinance - DEBUG - url=https://query2.finance.yahoo.com/v8/finance/chart/BTC-USD
+2024-12-22 15:15:32,718 - yfinance - DEBUG - params=frozendict.frozendict({'period1': 1732288532, 'period2': 1734880532, 'interval': '1h', 'includePrePost': False, 'events': 'div,splits,capitalGains'})
+2024-12-22 15:15:32,718 - yfinance - DEBUG -   Entering _get_cookie_and_crumb()
+2024-12-22 15:15:32,718 - yfinance - DEBUG - cookie_mode = 'basic'
+2024-12-22 15:15:32,718 - yfinance - DEBUG -    Entering _get_cookie_and_crumb_basic()
+2024-12-22 15:15:32,719 - peewee - DEBUG - ('CREATE TABLE IF NOT EXISTS "_cookieschema" ("strategy" VARCHAR(255) NOT NULL PRIMARY KEY, "fetch_date" DATETIME NOT NULL, "cookie_bytes" BLOB NOT NULL) WITHOUT ROWID', [])
+2024-12-22 15:15:32,720 - peewee - DEBUG - ('SELECT "t1"."strategy", "t1"."fetch_date", "t1"."cookie_bytes" FROM "_cookieschema" AS "t1" WHERE ("t1"."strategy" = ?) LIMIT ? OFFSET ?', ['basic', 1, 0])
+2024-12-22 15:15:32,720 - yfinance - DEBUG - loaded persistent cookie
+2024-12-22 15:15:32,720 - yfinance - DEBUG - reusing cookie
+2024-12-22 15:15:32,722 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): query1.finance.yahoo.com:443
+2024-12-22 15:15:32,809 - urllib3.connectionpool - DEBUG - https://query1.finance.yahoo.com:443 "GET /v1/test/getcrumb HTTP/11" 200 11
+2024-12-22 15:15:32,809 - yfinance - DEBUG - crumb = 'PYJEkAOm0wA'
+2024-12-22 15:15:32,809 - yfinance - DEBUG -    Exiting _get_cookie_and_crumb_basic()
+2024-12-22 15:15:32,809 - yfinance - DEBUG -   Exiting _get_cookie_and_crumb()
+2024-12-22 15:15:32,810 - urllib3.connectionpool - DEBUG - Starting new HTTPS connection (1): query2.finance.yahoo.com:443
+2024-12-22 15:15:33,065 - urllib3.connectionpool - DEBUG - https://query2.finance.yahoo.com:443 "GET /v8/finance/chart/BTC-USD?period1=1732288532&period2=1734880532&interval=1h&includePrePost=False&events=div%2Csplits%2CcapitalGains&crumb=PYJEkAOm0wA HTTP/11" 200 None
+2024-12-22 15:15:33,113 - yfinance - DEBUG - response code=200
+2024-12-22 15:15:33,113 - yfinance - DEBUG -  Exiting get()
+2024-12-22 15:15:33,116 - yfinance - DEBUG - BTC-USD: yfinance received OHLC data: 2024-11-22 15:00:00 -> 2024-12-22 15:00:00
+2024-12-22 15:15:33,124 - yfinance - DEBUG - BTC-USD: OHLC after cleaning: 2024-11-22 15:00:00+00:00 -> 2024-12-22 15:00:00+00:00
+2024-12-22 15:15:33,126 - yfinance - DEBUG - BTC-USD: OHLC after combining events: 2024-11-22 15:00:00+00:00 -> 2024-12-22 15:00:00+00:00
+2024-12-22 15:15:33,128 - yfinance - DEBUG - BTC-USD: yfinance returning OHLC: 2024-11-22 15:00:00+00:00 -> 2024-12-22 15:00:00+00:00
+2024-12-22 15:15:33,128 - yfinance - DEBUG - Exiting history()
+2024-12-22 15:15:33,128 - btc_trader.services.backtest_service - ERROR - Error in run_backtest: SimpleMAStrategy.get_required_indicators() takes 1 positional argument but 2 were given
+2024-12-22 15:15:33,128 - __main__ - ERROR - Error in backtest endpoint: SimpleMAStrategy.get_required_indicators() takes 1 positional argument but 2 were given
+2024-12-22 15:15:33,129 - __main__ - ERROR - Traceback (most recent call last):
+  File "/home/me/btc_backtester/btc_trader/web/app.py", line 116, in backtest
+    results = backtest_service.run_backtest(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/me/btc_backtester/btc_trader/services/backtest_service.py", line 91, in run_backtest
+    data = self._prepare_data(period_days, interval)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/me/btc_backtester/btc_trader/services/backtest_service.py", line 35, in _prepare_data
+    strategy_indicators = strategy_class.get_required_indicators({})
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: SimpleMAStrategy.get_required_indicators() takes 1 positional argument but 2 were given
+
+2024-12-22 15:15:33,129 - werkzeug - INFO - 127.0.0.1 - - [22/Dec/2024 15:15:33] "[35m[1mPOST /api/backtest HTTP/1.1[0m" 500 -
