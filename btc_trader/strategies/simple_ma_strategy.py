@@ -1,7 +1,14 @@
-from .base_strategy import BaseStrategy
+from .base_strategy import BaseStrategy, StrategyParameters
 import pandas as pd
 import numpy as np
 from typing import Dict, Any
+from dataclasses import dataclass
+
+@dataclass
+class SimpleMAParameters(StrategyParameters):
+    """Simple MA strategy specific parameters"""
+    short_window: int = 20  # Within 5-50 range
+    long_window: int = 50   # Within 20-200 range
 
 class SimpleMAStrategy(BaseStrategy):
     """Simple Moving Average Crossover Strategy
@@ -9,21 +16,53 @@ class SimpleMAStrategy(BaseStrategy):
     This strategy generates trading signals based on the crossover of two moving averages:
     - Buy when short-term MA crosses above long-term MA
     - Sell when short-term MA crosses below long-term MA
-    
-    Parameters:
-        data (pd.DataFrame): Price data with OHLCV columns
-        short_window (int): Short-term moving average window (default: 20)
-        long_window (int): Long-term moving average window (default: 50)
     """
     
-    def __init__(self, data: pd.DataFrame, short_window: int = 20, long_window: int = 50, **kwargs):
-        """Initialize strategy with data and MA parameters"""
-        if not isinstance(data, pd.DataFrame) or 'Close' not in data.columns:
-            raise ValueError("Data must be a DataFrame with a 'Close' column")
+    def _initialize_parameters(self, **kwargs) -> SimpleMAParameters:
+        """Initialize strategy parameters"""
+        return SimpleMAParameters(**kwargs)
+    
+    def _initialize_indicators(self) -> None:
+        """Initialize technical indicators"""
+        # Calculate moving averages
+        self._data['ma_short'] = self._data['close'].rolling(window=self.parameters.short_window).mean()
+        self._data['ma_long'] = self._data['close'].rolling(window=self.parameters.long_window).mean()
+    
+    def generate_signals(self) -> pd.DataFrame:
+        """Generate trading signals based on MA crossover
         
-        self.short_window = short_window
-        self.long_window = long_window
-        super().__init__(data, **kwargs)
+        Returns:
+            pd.DataFrame: DataFrame with signals and moving averages
+        """
+        signals = self._data.copy()
+        
+        # Initialize signal column
+        signals['signal'] = 0
+        signals['signal_strength'] = 0.0
+        
+        # Generate crossover signals using vectorized operations
+        signals['short_above'] = (signals['ma_short'] > signals['ma_long']).astype(int)
+        signals['prev_short_above'] = signals['short_above'].shift(1)
+        
+        # Buy signal: Short MA crosses above Long MA
+        buy_signals = (signals['short_above'] == 1) & (signals['prev_short_above'] == 0)
+        signals.loc[buy_signals, 'signal'] = 1
+        
+        # Sell signal: Short MA crosses below Long MA
+        sell_signals = (signals['short_above'] == 0) & (signals['prev_short_above'] == 1)
+        signals.loc[sell_signals, 'signal'] = -1
+        
+        # Calculate signal strength based on MA difference
+        ma_diff = (signals['ma_short'] - signals['ma_long']) / signals['ma_long']
+        signals.loc[signals['signal'] != 0, 'signal_strength'] = ma_diff.abs()
+        
+        # Clean up temporary columns
+        signals.drop(['short_above', 'prev_short_above'], axis=1, inplace=True)
+        
+        # Remove signals where moving averages are not yet calculated
+        signals.loc[signals['ma_short'].isna() | signals['ma_long'].isna(), 'signal'] = 0
+        
+        return signals
     
     @classmethod
     def get_parameters(cls) -> Dict[str, Any]:
@@ -33,27 +72,32 @@ class SimpleMAStrategy(BaseStrategy):
                 'type': 'int',
                 'default': 20,
                 'min': 5,
-                'max': 100,
-                'description': 'Short-term moving average window'
+                'max': 50,
+                'description': 'Short-term moving average period',
+                'validate': lambda x, params: x < params.get('long_window', float('inf'))
             },
             'long_window': {
                 'type': 'int',
                 'default': 50,
-                'min': 10,
+                'min': 20,
                 'max': 200,
-                'description': 'Long-term moving average window'
+                'description': 'Long-term moving average period',
+                'validate': lambda x, params: x > params.get('short_window', 0)
+            },
+            'stop_loss': {
+                'type': 'float',
+                'default': 0.02,
+                'min': 0.001,
+                'max': 0.1,
+                'description': 'Stop loss percentage'
+            },
+            'take_profit': {
+                'type': 'float',
+                'default': 0.03,
+                'min': 0.001,
+                'max': 0.2,
+                'description': 'Take profit percentage'
             }
-        }
-    
-    @classmethod
-    def get_required_indicators(cls) -> Dict[str, Any]:
-        """Return required indicators with default parameters"""
-        params = cls.get_parameters()
-        return {
-            'SMA': [
-                params['short_window']['default'],
-                params['long_window']['default']
-            ]
         }
     
     def validate_parameters(self, **kwargs) -> bool:
@@ -62,68 +106,13 @@ class SimpleMAStrategy(BaseStrategy):
         Raises:
             ValueError: If parameters are invalid
         """
-        if self.short_window >= self.long_window:
+        # Validate MA-specific parameters
+        if not 5 <= self.parameters.short_window <= 50:
+            raise ValueError("Short window must be between 5 and 50")
+        if not 20 <= self.parameters.long_window <= 200:
+            raise ValueError("Long window must be between 20 and 200")
+        if self.parameters.short_window >= self.parameters.long_window:
             raise ValueError("Short window must be less than long window")
-        if self.short_window < self.get_parameters()['short_window']['min']:
-            raise ValueError(f"Short window must be at least {self.get_parameters()['short_window']['min']}")
-        if self.long_window > self.get_parameters()['long_window']['max']:
-            raise ValueError(f"Long window must be less than {self.get_parameters()['long_window']['max']}")
-        return True
-    
-    def generate_signals(self) -> pd.DataFrame:
-        """Generate trading signals based on MA crossover
-        
-        Returns:
-            pd.DataFrame: DataFrame with signals and moving averages
-        """
-        signals = self.data.copy()
-        
-        # Calculate moving averages using numpy for efficiency
-        close_array = signals['Close'].values
-        short_ma = pd.Series(
-            np.concatenate([
-                np.full(self.short_window - 1, np.nan),
-                np.convolve(close_array, np.ones(self.short_window)/self.short_window, mode='valid')
-            ]),
-            index=signals.index
-        )
-        long_ma = pd.Series(
-            np.concatenate([
-                np.full(self.long_window - 1, np.nan),
-                np.convolve(close_array, np.ones(self.long_window)/self.long_window, mode='valid')
-            ]),
-            index=signals.index
-        )
-        
-        # Store MAs for visualization
-        signals['short_ma'] = short_ma
-        signals['long_ma'] = long_ma
-        
-        # Initialize signal column
-        signals['signal'] = 0
-        
-        # Generate crossover signals using vectorized operations
-        signals['short_above'] = (short_ma > long_ma).astype(int)
-        signals['prev_short_above'] = signals['short_above'].shift(1)
-        
-        # Buy signal: Short MA crosses above Long MA
-        signals.loc[
-            (signals['short_above'] == 1) & 
-            (signals['prev_short_above'] == 0),
-            'signal'
-        ] = 1
-        
-        # Sell signal: Short MA crosses below Long MA
-        signals.loc[
-            (signals['short_above'] == 0) & 
-            (signals['prev_short_above'] == 1),
-            'signal'
-        ] = -1
-        
-        # Clean up temporary columns
-        signals.drop(['short_above', 'prev_short_above'], axis=1, inplace=True)
-        
-        # Remove signals where moving averages are not yet calculated
-        signals.loc[signals['short_ma'].isna() | signals['long_ma'].isna(), 'signal'] = 0
-        
-        return signals
+            
+        # Validate common parameters from base class
+        return super().validate_parameters(**kwargs)

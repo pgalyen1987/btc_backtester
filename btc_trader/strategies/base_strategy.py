@@ -2,274 +2,330 @@ from abc import ABC, abstractmethod
 import pandas as pd
 import numpy as np
 from datetime import datetime
-from typing import Dict, List, Any, Optional
-from .strategy_interface import (
-    StrategyInterface, BacktestResult, BacktestMetrics, TradeResult
-)
+from typing import Dict, List, Any, Optional, Tuple, ClassVar, TypeVar, Type
+from dataclasses import dataclass, field
+import logging
 
-class BaseStrategy(StrategyInterface):
+logger = logging.getLogger(__name__)
+
+@dataclass
+class StrategyParameters:
+    """Base class for strategy parameters"""
+    stop_loss: float = 0.02  # 2% - within 0.1% to 10% range
+    take_profit: float = 0.03  # 3% - within 0.1% to 20% range
+    max_position_size: float = 0.5  # 50% - within 10% to 100% range
+    commission: float = 0.001  # 0.1% - within 0% to 1% range
+    use_volatility_filter: bool = False  # Default to simpler strategy
+    volatility_window: int = 20  # Within 5 to 100 range
+    volatility_threshold: float = 0.02  # 2% - within 0.1% to 10% range
+    trend_window: int = 50  # Within 10 to 200 range
+    min_trend_strength: float = 0.05  # 5% - within 1% to 100% range
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert parameters to dictionary"""
+        return {
+            key: getattr(self, key)
+            for key in self.__dataclass_fields__
+        }
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'StrategyParameters':
+        """Create parameters from dictionary"""
+        return cls(**{
+            key: data.get(key, field.default)
+            for key, field in cls.__dataclass_fields__.items()
+        })
+
+@dataclass
+class Position:
+    """Represents an open trading position"""
+    entry_date: datetime
+    entry_price: float
+    shares: float
+    type: str
+    stop_loss: float
+    take_profit: float
+    confidence: Optional[float] = None
+    ml_features: Optional[Dict[str, float]] = None
+
+@dataclass
+class TradeResult:
+    """Represents the result of a completed trade"""
+    entry_date: datetime
+    exit_date: datetime
+    entry_price: float
+    exit_price: float
+    shares: float
+    return_value: float
+    type: str
+    confidence: Optional[float] = None
+    ml_features: Optional[Dict[str, float]] = None
+
+@dataclass
+class BacktestMetrics:
+    """Contains metrics from a backtest run"""
+    total_return: float
+    annual_return: float
+    sharpe_ratio: float
+    sortino_ratio: float
+    max_drawdown: float
+    win_rate: float
+    profit_factor: float
+    trade_count: int
+    commission_paid: float
+    avg_trade_duration: float
+    avg_profit_per_trade: float
+    max_consecutive_losses: int
+
+    def to_dict(self) -> Dict[str, float]:
+        """Convert metrics to dictionary"""
+        return {
+            key: getattr(self, key)
+            for key in self.__dataclass_fields__
+        }
+
+class BaseStrategy(ABC):
     """Base class for all trading strategies
     
     This class provides common functionality for all trading strategies:
     - Signal generation interface
     - Risk management
+    - Position sizing
     - Backtesting
     - Parameter validation
-    
-    All strategies should inherit from this class and implement the required methods.
+    - Common filters (volatility, trend)
     """
     
     def __init__(self, data: pd.DataFrame, **kwargs):
-        """Initialize strategy with data and parameters
-        
-        Args:
-            data (pd.DataFrame): Price data with OHLCV columns
-            **kwargs: Strategy-specific parameters
-            
-        Raises:
-            ValueError: If data is invalid or missing required columns
-        """
-        if not isinstance(data, pd.DataFrame):
-            raise ValueError("Data must be a pandas DataFrame")
-        if 'Close' not in data.columns:
-            raise ValueError("Data must contain a 'Close' column")
-            
-        self.data = data
-        self.positions = []
-        self.current_position = None
-        self.trade_log = []
-        self.validate_parameters(**kwargs)
+        """Initialize strategy with data and parameters"""
+        self._validate_data(data)
+        self._data = data.copy()
+        self._positions: List[Position] = []
+        self._current_position: Optional[Position] = None
+        self._trade_log: List[TradeResult] = []
+        self._parameters = self._initialize_parameters(**kwargs)
+        self._initialize_indicators()
+    
+    @property
+    def data(self) -> pd.DataFrame:
+        """Get the strategy's data"""
+        return self._data
+    
+    @property
+    def positions(self) -> List[Position]:
+        """Get current positions"""
+        return self._positions.copy()
+    
+    @property
+    def current_position(self) -> Optional[Position]:
+        """Get current active position"""
+        return self._current_position
+    
+    @property
+    def trade_log(self) -> List[TradeResult]:
+        """Get completed trades"""
+        return self._trade_log.copy()
+    
+    @property
+    def parameters(self) -> StrategyParameters:
+        """Get strategy parameters"""
+        return self._parameters
     
     @abstractmethod
-    def generate_signals(self) -> pd.DataFrame:
+    def generate_signals(self) -> pd.Series:
         """Generate trading signals based on the strategy
         
         Returns:
-            pd.DataFrame: DataFrame with at least a 'signal' column containing:
-                         1 for buy signals
-                         -1 for sell signals
-                         0 for no action
+            Series of trading signals (1 for buy, -1 for sell, 0 for hold)
         """
         pass
     
-    @classmethod
-    def get_required_indicators(cls) -> Dict[str, Any]:
-        """Default implementation returning empty dict
-        
-        Returns:
-            Dict[str, Any]: Empty dictionary by default
-        """
-        return {}
+    @abstractmethod
+    def _initialize_parameters(self, **kwargs) -> StrategyParameters:
+        """Initialize strategy-specific parameters"""
+        pass
     
-    def get_strategy_info(self) -> Dict[str, Any]:
-        """Return strategy information
+    @abstractmethod
+    def _initialize_indicators(self) -> None:
+        """Initialize technical indicators used by the strategy"""
+        pass
+    
+    def _validate_data(self, data: pd.DataFrame) -> None:
+        """Validate input data requirements"""
+        required_columns = {'open', 'high', 'low', 'close', 'volume'}
+        missing_columns = required_columns - set(data.columns)
+        if missing_columns:
+            raise ValueError(f"Missing required columns: {missing_columns}")
         
-        Returns:
-            Dict[str, Any]: Dictionary containing:
-                - name: Strategy class name
-                - description: Strategy docstring
-                - parameters: Strategy parameters
-        """
+        if not isinstance(data.index, pd.DatetimeIndex):
+            raise ValueError("Data index must be DatetimeIndex")
+    
+    def calculate_position_size(self, signal: int, price: float, portfolio_value: float) -> float:
+        """Calculate the position size for a trade"""
+        if signal == 0 or portfolio_value <= 0:
+            return 0.0
+        
+        position_value = portfolio_value * self.parameters.max_position_size
+        return position_value / price
+    
+    def apply_risk_management(self, position: Position, current_price: float) -> Optional[float]:
+        """Apply risk management rules and return exit price if triggered"""
+        if position.type == 'long':
+            if current_price <= position.entry_price * (1 - position.stop_loss):
+                return current_price  # Stop loss triggered
+            if current_price >= position.entry_price * (1 + position.take_profit):
+                return current_price  # Take profit triggered
+        else:  # short position
+            if current_price >= position.entry_price * (1 + position.stop_loss):
+                return current_price  # Stop loss triggered
+            if current_price <= position.entry_price * (1 - position.take_profit):
+                return current_price  # Take profit triggered
+        return None
+    
+    def _apply_volatility_filter(self, signals: pd.Series) -> pd.Series:
+        """Apply volatility filter to signals"""
+        if not self.parameters.use_volatility_filter:
+            return signals
+        
+        volatility = self.data['close'].pct_change().rolling(
+            window=self.parameters.volatility_window
+        ).std()
+        
+        return signals.where(
+            volatility <= self.parameters.volatility_threshold,
+            0
+        )
+    
+    def _apply_trend_filter(self, signals: pd.Series) -> pd.Series:
+        """Apply trend filter to signals"""
+        trend = self.data['close'].pct_change(
+            periods=self.parameters.trend_window
+        ).abs()
+        
+        return signals.where(
+            trend >= self.parameters.min_trend_strength,
+            0
+        )
+    
+    def get_state(self) -> Dict[str, Any]:
+        """Get current state of the strategy"""
         return {
-            'name': self.__class__.__name__,
-            'description': self.__class__.__doc__ or '',
-            'parameters': self.__class__.get_parameters()
+            'parameters': self.parameters.to_dict(),
+            'positions': [vars(pos) for pos in self.positions],
+            'current_position': vars(self.current_position) if self.current_position else None,
+            'trade_log': [vars(trade) for trade in self.trade_log]
+        }
+    
+    def set_state(self, state: Dict[str, Any]) -> None:
+        """Set strategy state from saved state"""
+        self._parameters = StrategyParameters.from_dict(state['parameters'])
+        self._positions = [Position(**pos) for pos in state['positions']]
+        self._current_position = Position(**state['current_position']) if state['current_position'] else None
+        self._trade_log = [TradeResult(**trade) for trade in state['trade_log']]
+    
+    @classmethod
+    def get_parameters_schema(cls) -> Dict[str, Dict[str, Any]]:
+        """Get parameter schema with validation rules"""
+        return {
+            'stop_loss': {
+                'type': 'float',
+                'default': 0.02,
+                'min': 0.001,  # 0.1%
+                'max': 0.1,    # 10%
+                'description': 'Stop loss percentage'
+            },
+            'take_profit': {
+                'type': 'float',
+                'default': 0.03,
+                'min': 0.001,  # 0.1%
+                'max': 0.2,    # 20%
+                'description': 'Take profit percentage'
+            },
+            'max_position_size': {
+                'type': 'float',
+                'default': 0.5,
+                'min': 0.1,    # 10%
+                'max': 1.0,    # 100%
+                'description': 'Maximum position size as fraction of portfolio'
+            },
+            'commission': {
+                'type': 'float',
+                'default': 0.001,
+                'min': 0.0,    # 0%
+                'max': 0.01,   # 1%
+                'description': 'Trading commission percentage'
+            },
+            'use_volatility_filter': {
+                'type': 'bool',
+                'default': False,
+                'description': 'Whether to use volatility filter'
+            },
+            'volatility_window': {
+                'type': 'int',
+                'default': 20,
+                'min': 5,
+                'max': 100,
+                'description': 'Volatility calculation window'
+            },
+            'volatility_threshold': {
+                'type': 'float',
+                'default': 0.02,
+                'min': 0.001,  # 0.1%
+                'max': 0.1,    # 10%
+                'description': 'Maximum allowed volatility'
+            },
+            'trend_window': {
+                'type': 'int',
+                'default': 50,
+                'min': 10,
+                'max': 200,
+                'description': 'Trend calculation window'
+            },
+            'min_trend_strength': {
+                'type': 'float',
+                'default': 0.05,
+                'min': 0.01,   # 1%
+                'max': 1.0,    # 100%
+                'description': 'Minimum trend strength required'
+            }
         }
     
     @classmethod
-    def get_parameters(cls) -> Dict[str, Any]:
-        """Return strategy parameters
-        
-        Returns:
-            Dict[str, Any]: Empty dictionary by default
-        """
-        return {}
+    def get_required_indicators(cls) -> Dict[str, List[int]]:
+        """Get required technical indicators for the strategy"""
+        return {
+            'BBANDS': None  # Default Bollinger Bands for volatility filter
+        }
     
     def validate_parameters(self, **kwargs) -> bool:
-        """Validate strategy parameters
+        """Validate common strategy parameters
         
-        Args:
-            **kwargs: Strategy-specific parameters
-            
-        Returns:
-            bool: True if parameters are valid
-            
         Raises:
             ValueError: If parameters are invalid
         """
+        # Validate stop loss and take profit
+        if not 0.001 <= self.parameters.stop_loss <= 0.1:
+            raise ValueError("Stop loss must be between 0.1% and 10%")
+        if not 0.001 <= self.parameters.take_profit <= 0.2:
+            raise ValueError("Take profit must be between 0.1% and 20%")
+            
+        # Validate position sizing and commission
+        if not 0.1 <= self.parameters.max_position_size <= 1.0:
+            raise ValueError("Max position size must be between 0.1 and 1.0")
+        if not 0.0 <= self.parameters.commission <= 0.01:
+            raise ValueError("Commission must be between 0% and 1%")
+            
+        # Validate volatility filter parameters if enabled
+        if self.parameters.use_volatility_filter:
+            if not 5 <= self.parameters.volatility_window <= 100:
+                raise ValueError("Volatility window must be between 5 and 100")
+            if not 0.001 <= self.parameters.volatility_threshold <= 0.1:
+                raise ValueError("Volatility threshold must be between 0.1% and 10%")
+                
+        # Validate trend parameters
+        if not 10 <= self.parameters.trend_window <= 200:
+            raise ValueError("Trend window must be between 10 and 200")
+        if not 0.01 <= self.parameters.min_trend_strength <= 1.0:
+            raise ValueError("Minimum trend strength must be between 0.01 and 1.0")
+            
         return True
-    
-    def apply_risk_management(self, signals: pd.DataFrame, stop_loss: float, take_profit: float) -> pd.DataFrame:
-        """Apply risk management rules to the signals
-        
-        Args:
-            signals (pd.DataFrame): DataFrame with trading signals
-            stop_loss (float): Stop loss percentage as decimal (e.g., 0.02 for 2%)
-            take_profit (float): Take profit percentage as decimal (e.g., 0.03 for 3%)
-            
-        Returns:
-            pd.DataFrame: DataFrame with updated signals after risk management
-            
-        Raises:
-            ValueError: If stop_loss or take_profit are invalid
-        """
-        if not 0 < stop_loss < 1:
-            raise ValueError("Stop loss must be between 0 and 1")
-        if not 0 < take_profit < 1:
-            raise ValueError("Take profit must be between 0 and 1")
-            
-        signals = signals.copy()
-        entry_price = None
-        position = 0
-        
-        for i in range(len(signals)):
-            if position == 0 and signals['signal'].iloc[i] == 1:  # New long position
-                entry_price = signals['Close'].iloc[i]
-                position = 1
-            elif position == 1:
-                current_price = signals['Close'].iloc[i]
-                # Check stop loss
-                if current_price < entry_price * (1 - stop_loss):
-                    signals.loc[signals.index[i], 'signal'] = -1  # Force sell
-                    position = 0
-                # Check take profit
-                elif current_price > entry_price * (1 + take_profit):
-                    signals.loc[signals.index[i], 'signal'] = -1  # Take profit
-                    position = 0
-            
-            if signals['signal'].iloc[i] == -1:
-                position = 0
-                entry_price = None
-        
-        return signals
-    
-    def backtest(self, initial_capital: float, stop_loss: float, 
-                take_profit: float, position_size: float, 
-                commission: float) -> BacktestResult:
-        """Run backtest with specified parameters
-        
-        Args:
-            initial_capital (float): Starting capital for the backtest
-            stop_loss (float): Stop loss percentage as decimal
-            take_profit (float): Take profit percentage as decimal
-            position_size (float): Position size as percentage of capital
-            commission (float): Commission percentage per trade
-            
-        Returns:
-            BacktestResult: Complete results of the backtest
-            
-        Raises:
-            ValueError: If any parameters are invalid
-        """
-        if initial_capital <= 0:
-            raise ValueError("Initial capital must be positive")
-        if not 0 < position_size <= 1:
-            raise ValueError("Position size must be between 0 and 1")
-        if not 0 <= commission < 1:
-            raise ValueError("Commission must be between 0 and 1")
-            
-        signals = self.generate_signals()
-        signals = self.apply_risk_management(signals, stop_loss, take_profit)
-        
-        # Initialize portfolio
-        portfolio = pd.DataFrame(index=signals.index)
-        portfolio['positions'] = 0.0
-        portfolio['cash'] = initial_capital
-        portfolio['holdings'] = 0.0
-        portfolio['total'] = initial_capital
-        portfolio['returns'] = 0.0
-        
-        # Track positions and calculate returns
-        position = 0
-        entry_price = None
-        entry_date = None
-        trades: List[TradeResult] = []
-        
-        for i in range(len(signals)):
-            if signals['signal'].iloc[i] == 1 and position == 0:  # Buy signal
-                position = 1
-                entry_price = signals['Close'].iloc[i]
-                entry_date = signals.index[i]
-                available_capital = portfolio['cash'].iloc[i] * position_size
-                shares = (available_capital * (1 - commission)) / signals['Close'].iloc[i]
-                portfolio.iloc[i:, portfolio.columns.get_loc('positions')] = shares
-                portfolio.iloc[i:, portfolio.columns.get_loc('cash')] -= shares * signals['Close'].iloc[i] * (1 + commission)
-                
-                trades.append(TradeResult(
-                    entry_date=str(entry_date),
-                    exit_date=None,
-                    entry_price=float(entry_price),
-                    exit_price=0.0,
-                    shares=float(shares),
-                    return_value=0.0,
-                    type='BUY'
-                ))
-                
-            elif signals['signal'].iloc[i] == -1 and position == 1:  # Sell signal
-                position = 0
-                exit_price = signals['Close'].iloc[i]
-                exit_date = signals.index[i]
-                shares = portfolio['positions'].iloc[i]
-                portfolio.iloc[i:, portfolio.columns.get_loc('positions')] = 0
-                portfolio.iloc[i:, portfolio.columns.get_loc('cash')] += shares * signals['Close'].iloc[i] * (1 - commission)
-                
-                # Update last trade
-                if trades:
-                    trade_return = (exit_price - entry_price) / entry_price
-                    trades[-1] = TradeResult(
-                        entry_date=trades[-1].entry_date,
-                        exit_date=str(exit_date),
-                        entry_price=trades[-1].entry_price,
-                        exit_price=float(exit_price),
-                        shares=trades[-1].shares,
-                        return_value=float(trade_return),
-                        type=trades[-1].type
-                    )
-                
-                entry_price = None
-                entry_date = None
-        
-        # Close any open position at the end
-        if position == 1:
-            exit_price = signals['Close'].iloc[-1]
-            exit_date = signals.index[-1]
-            trade_return = (exit_price - entry_price) / entry_price if entry_price else 0.0
-            if trades:
-                trades[-1] = TradeResult(
-                    entry_date=trades[-1].entry_date,
-                    exit_date=str(exit_date),
-                    entry_price=trades[-1].entry_price,
-                    exit_price=float(exit_price),
-                    shares=trades[-1].shares,
-                    return_value=float(trade_return),
-                    type=trades[-1].type
-                )
-        
-        # Calculate holdings and total value
-        portfolio['holdings'] = portfolio['positions'] * signals['Close']
-        portfolio['total'] = portfolio['cash'] + portfolio['holdings']
-        portfolio['returns'] = portfolio['total'].pct_change()
-        
-        # Calculate metrics
-        returns = portfolio['returns'].dropna()
-        winning_trades = [t for t in trades if t.return_value > 0]
-        losing_trades = [t for t in trades if t.return_value <= 0]
-        
-        metrics = BacktestMetrics(
-            total_return=(portfolio['total'].iloc[-1] - initial_capital) / initial_capital if not portfolio['total'].empty else 0.0,
-            annual_return=returns.mean() * 252 if not returns.empty else 0.0,
-            sharpe_ratio=(returns.mean() * 252) / (returns.std() * np.sqrt(252)) if not returns.empty and returns.std() != 0 else 0.0,
-            sortino_ratio=(returns.mean() * 252) / (returns[returns < 0].std() * np.sqrt(252)) if len(returns[returns < 0]) > 0 else 0.0,
-            max_drawdown=(portfolio['total'] / portfolio['total'].cummax() - 1).min() if not portfolio['total'].empty else 0.0,
-            win_rate=len(winning_trades) / len(trades) if trades else 0.0,
-            profit_factor=abs(sum(t.return_value for t in winning_trades) / sum(t.return_value for t in losing_trades)) if losing_trades else float('inf'),
-            trade_count=len(trades),
-            commission_paid=sum(t.shares * t.entry_price * commission + (t.shares * t.exit_price * commission if t.exit_price else 0) for t in trades)
-        )
-        
-        return BacktestResult(
-            metrics=metrics,
-            portfolio=portfolio,
-            trades=trades,
-            signals=signals['signal'].fillna(0).astype(int).tolist()
-        )

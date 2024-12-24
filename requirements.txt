@@ -1,8 +1,7 @@
-yfinance>=0.2.36
-matplotlib>=3.8.0
-plotly>=5.18.0
-finta>=1.3
-flask>=2.0.0
-flask-cors>=4.0.0
-pandas>=2.0.0
-numpy>=1.24.0
+flask==3.0.0
+flask-sock==0.7.0
+simple-websocket==1.0.0
+python-dotenv==1.0.0
+requests==2.31.0
+numpy==1.26.2
+pandas==2.1.3

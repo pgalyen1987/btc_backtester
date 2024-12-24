@@ -1,32 +1,53 @@
 import pandas as pd
-from typing import Dict, Any
+import numpy as np
+from typing import Dict, Any, List
 from .base_strategy import BaseStrategy
+from ..utils.indicators import add_technical_indicators
 
 class MACDStrategy(BaseStrategy):
     """MACD (Moving Average Convergence Divergence) Strategy
     
     This strategy generates trading signals based on MACD crossovers:
-    - Buy when MACD line crosses above signal line
-    - Sell when MACD line crosses below signal line
-    Additional confirmation from histogram direction can be used
+    - Buy when MACD line crosses above signal line with histogram confirmation
+    - Sell when MACD line crosses below signal line with histogram confirmation
+    - Additional filters for trend strength and volatility
     
     Parameters:
         data (pd.DataFrame): Price data with OHLCV columns
         fast_period (int): Fast EMA period (default: 12)
         slow_period (int): Slow EMA period (default: 26)
         signal_period (int): Signal line period (default: 9)
-        use_histogram (bool): Use histogram direction for confirmation (default: True)
+        min_trend_strength (float): Minimum trend strength threshold (default: 0.0002)
+        use_volatility_filter (bool): Use volatility filter (default: True)
+        volatility_window (int): Volatility calculation window (default: 20)
+        volatility_threshold (float): Maximum allowed volatility (default: 0.05)
     """
     
     def __init__(self, data: pd.DataFrame, fast_period: int = 12, 
                  slow_period: int = 26, signal_period: int = 9,
-                 use_histogram: bool = True, **kwargs):
+                 min_trend_strength: float = 0.0002,
+                 use_volatility_filter: bool = True,
+                 volatility_window: int = 20,
+                 volatility_threshold: float = 0.05,
+                 **kwargs):
         """Initialize strategy with data and MACD parameters"""
         self.fast_period = fast_period
         self.slow_period = slow_period
         self.signal_period = signal_period
-        self.use_histogram = use_histogram
+        kwargs.update({
+            'min_trend_strength': min_trend_strength,
+            'use_volatility_filter': use_volatility_filter,
+            'volatility_window': volatility_window,
+            'volatility_threshold': volatility_threshold
+        })
         super().__init__(data, **kwargs)
+    
+    def validate_parameters(self, **kwargs) -> None:
+        """Validate strategy parameters"""
+        if self.fast_period >= self.slow_period:
+            raise ValueError("Fast period must be less than slow period")
+        if self.signal_period >= self.fast_period:
+            raise ValueError("Signal period must be less than fast period")
     
     @classmethod
     def get_parameters(cls) -> Dict[str, Any]:
@@ -50,110 +71,71 @@ class MACDStrategy(BaseStrategy):
                 'type': 'int',
                 'default': 9,
                 'min': 3,
-                'max': 50,
+                'max': 30,
                 'description': 'Signal line period'
             },
-            'use_histogram': {
+            'min_trend_strength': {
+                'type': 'float',
+                'default': 0.05,
+                'min': 0.01,
+                'max': 1.0,
+                'description': 'Minimum trend strength threshold'
+            },
+            'use_volatility_filter': {
                 'type': 'bool',
                 'default': True,
-                'description': 'Use histogram direction for confirmation'
+                'description': 'Use volatility filter'
+            },
+            'volatility_window': {
+                'type': 'int',
+                'default': 20,
+                'min': 5,
+                'max': 100,
+                'description': 'Volatility calculation window'
+            },
+            'volatility_threshold': {
+                'type': 'float',
+                'default': 0.02,
+                'min': 0.001,
+                'max': 0.1,
+                'description': 'Maximum allowed volatility'
             }
         }
     
-    @classmethod
-    def get_required_indicators(cls) -> Dict[str, Any]:
-        """Return required indicators with default parameters"""
-        params = cls.get_parameters()
-        return {
-            'MACD': [
-                params['fast_period']['default'],
-                params['slow_period']['default'],
-                params['signal_period']['default']
-            ]
-        }
-    
-    def validate_parameters(self, **kwargs) -> bool:
-        """Validate strategy parameters
-        
-        Raises:
-            ValueError: If parameters are invalid
-        """
-        if not 5 <= self.fast_period <= 50:
-            raise ValueError("Fast period must be between 5 and 50")
-        if not 10 <= self.slow_period <= 100:
-            raise ValueError("Slow period must be between 10 and 100")
-        if not 3 <= self.signal_period <= 50:
-            raise ValueError("Signal period must be between 3 and 50")
-        if self.fast_period >= self.slow_period:
-            raise ValueError("Fast period must be less than slow period")
-        return True
-    
     def generate_signals(self) -> pd.DataFrame:
-        """Generate trading signals based on MACD crossovers
+        """Generate trading signals based on MACD strategy
         
         Returns:
-            pd.DataFrame: DataFrame with signals and MACD values
+            pd.DataFrame: DataFrame with signals and confidence scores
         """
-        signals = self.data.copy()
+        # Add indicators
+        df = add_technical_indicators(self.data, {
+            'MACD': None,
+            'BBANDS': None  # For volatility filter
+        })
         
-        # Calculate MACD components
-        fast_ema = signals['Close'].ewm(span=self.fast_period, adjust=False).mean()
-        slow_ema = signals['Close'].ewm(span=self.slow_period, adjust=False).mean()
+        # Initialize signals
+        df['signal'] = 0
+        df['confidence'] = 0.0
         
-        signals['MACD'] = fast_ema - slow_ema
-        signals['Signal'] = signals['MACD'].ewm(span=self.signal_period, adjust=False).mean()
-        signals['Histogram'] = signals['MACD'] - signals['Signal']
-        
-        # Initialize signal column
-        signals['signal'] = 0
-        
-        # Previous values for crossover detection
-        signals['prev_macd'] = signals['MACD'].shift(1)
-        signals['prev_signal'] = signals['Signal'].shift(1)
-        
-        if self.use_histogram:
-            # Use histogram direction for confirmation
-            signals['hist_direction'] = signals['Histogram'].apply(lambda x: 1 if x > 0 else -1)
-            signals['prev_hist_direction'] = signals['hist_direction'].shift(1)
+        # Generate signals
+        for i in range(1, len(df)):
+            # MACD crossover conditions
+            macd_cross_up = df['MACD'].iloc[i-1] < df['MACD_SIGNAL'].iloc[i-1] and \
+                          df['MACD'].iloc[i] > df['MACD_SIGNAL'].iloc[i]
+            macd_cross_down = df['MACD'].iloc[i-1] > df['MACD_SIGNAL'].iloc[i-1] and \
+                            df['MACD'].iloc[i] < df['MACD_SIGNAL'].iloc[i]
             
-            # Buy signal: MACD crosses above signal line with positive histogram
-            signals.loc[
-                (signals['MACD'] > signals['Signal']) & 
-                (signals['prev_macd'] <= signals['prev_signal']) &
-                (signals['hist_direction'] == 1),
-                'signal'
-            ] = 1
+            # Check trend and volatility filters
+            strong_trend, trend_strength, trend_direction = self.check_trend_filter(df['Close'], i)
+            normal_volatility = self.check_volatility_filter(df, i)
             
-            # Sell signal: MACD crosses below signal line with negative histogram
-            signals.loc[
-                (signals['MACD'] < signals['Signal']) & 
-                (signals['prev_macd'] >= signals['prev_signal']) &
-                (signals['hist_direction'] == -1),
-                'signal'
-            ] = -1
-            
-            # Clean up histogram columns
-            signals.drop(['hist_direction', 'prev_hist_direction'], axis=1, inplace=True)
-        else:
-            # Simple MACD crossover without histogram confirmation
-            # Buy signal: MACD crosses above signal line
-            signals.loc[
-                (signals['MACD'] > signals['Signal']) & 
-                (signals['prev_macd'] <= signals['prev_signal']),
-                'signal'
-            ] = 1
-            
-            # Sell signal: MACD crosses below signal line
-            signals.loc[
-                (signals['MACD'] < signals['Signal']) & 
-                (signals['prev_macd'] >= signals['prev_signal']),
-                'signal'
-            ] = -1
+            # Generate signals with confidence
+            if macd_cross_up and trend_direction > 0 and strong_trend and normal_volatility:
+                df.loc[df.index[i], 'signal'] = 1
+                df.loc[df.index[i], 'confidence'] = self.calculate_confidence(trend_strength)
+            elif macd_cross_down and trend_direction < 0 and strong_trend and normal_volatility:
+                df.loc[df.index[i], 'signal'] = -1
+                df.loc[df.index[i], 'confidence'] = self.calculate_confidence(trend_strength)
         
-        # Clean up temporary columns
-        signals.drop(['prev_macd', 'prev_signal'], axis=1, inplace=True)
-        
-        # Remove signals where MACD components are not yet calculated
-        signals.loc[signals['MACD'].isna() | signals['Signal'].isna(), 'signal'] = 0
-        
-        return signals
+        return df
