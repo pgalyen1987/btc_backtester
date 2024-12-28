@@ -3,49 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bitcoin Price Dashboard</title>
+    <title>Bitcoin Price Analysis</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/favicon.ico', v=range(1, 9999999)|random) }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="dashboard">
         <nav class="sidebar">
             <div class="logo">
+                <img src="{{ url_for('static', filename='img/favicon.ico', v=range(1, 9999999)|random) }}" alt="Bitcoin Logo">
                 <h2>BTC Dashboard</h2>
             </div>
             <ul class="nav-links">
-                <li class="active"><a href="/">Price Chart</a></li>
-                <li><a href="#">Analytics</a></li>
-                <li><a href="#">Settings</a></li>
+                <li class="active">
+                    <a href="/"><i class="fas fa-chart-line"></i> Price Chart</a>
+                </li>
+                <li>
+                    <a href="#"><i class="fas fa-chart-bar"></i> Analytics</a>
+                </li>
+                <li>
+                    <a href="#"><i class="fas fa-newspaper"></i> News</a>
+                </li>
+                <li>
+                    <a href="#"><i class="fas fa-cog"></i> Settings</a>
+                </li>
             </ul>
         </nav>
         
         <main class="main-content">
             <header>
-                <h1>Bitcoin Price Analysis</h1>
+                <h1><i class="fab fa-bitcoin"></i> Bitcoin Price Analysis</h1>
                 <div class="header-right">
-                    <span id="last-updated"></span>
+                    <div class="price-info">
+                        <div class="current-price" id="current-price">Loading...</div>
+                        <div class="price-change" id="price-change">Loading...</div>
+                    </div>
+                    <div id="last-updated"></div>
                 </div>
             </header>
             
             <div class="chart-container">
-                <iframe src="{{ url_for('static', filename='btc_chart.html') }}" 
-                        frameborder="0" 
-                        width="100%" 
-                        height="100%">
-                </iframe>
+                <iframe src="{{ url_for('static', filename='btc_chart.html') }}" frameborder="0"></iframe>
             </div>
         </main>
     </div>
 
     <script>
-        // Update the last updated timestamp
-        function updateTimestamp() {
-            const now = new Date();
-            document.getElementById('last-updated').textContent = 
-                'Last updated: ' + now.toLocaleString();
+        // Function to format price with commas and 2 decimal places
+        function formatPrice(price) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD'
+            }).format(price);
         }
-        updateTimestamp();
-        setInterval(updateTimestamp, 60000);  // Update every minute
+
+        // Function to format percentage
+        function formatPercentage(percentage) {
+            return percentage.toFixed(2) + '%';
+        }
+
+        // Update the price information
+        async function updatePriceInfo() {
+            try {
+                const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true');
+                const data = await response.json();
+                
+                const price = data.bitcoin.usd;
+                const change = data.bitcoin.usd_24h_change;
+                
+                document.getElementById('current-price').textContent = formatPrice(price);
+                const priceChangeElement = document.getElementById('price-change');
+                priceChangeElement.textContent = (change >= 0 ? '+' : '') + formatPercentage(change);
+                priceChangeElement.className = 'price-change ' + (change >= 0 ? 'positive' : 'negative');
+                
+                // Update timestamp
+                const now = new Date();
+                document.getElementById('last-updated').textContent = 
+                    'Last updated: ' + now.toLocaleString();
+            } catch (error) {
+                console.error('Error fetching price:', error);
+            }
+        }
+
+        // Update price immediately and every 30 seconds
+        updatePriceInfo();
+        setInterval(updatePriceInfo, 30000);
     </script>
 </body>
 </html> 
