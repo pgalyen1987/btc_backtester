@@ -4,6 +4,9 @@ import plotly.graph_objects as go
 from datetime import datetime, timedelta
 import os
 
+# Get the directory where the script is located
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
 def get_btc_data(start="2008-01-01", interval="1m") -> DataFrame:
     """
     Download BTC-USD data from Yahoo Finance
@@ -83,11 +86,13 @@ def create_interactive_chart(data):
         ]
     )
 
-    # Ensure static directory exists
-    os.makedirs('static', exist_ok=True)
+    # Create static directory in the correct location
+    static_dir = os.path.join(SCRIPT_DIR, 'static')
+    os.makedirs(static_dir, exist_ok=True)
     
     # Save the interactive chart as HTML in the static directory
-    fig.write_html('static/btc_chart.html')
+    chart_path = os.path.join(static_dir, 'btc_chart.html')
+    fig.write_html(chart_path)
 
 def main():
     # Get BTC data from 2008

@@ -1,12 +1,17 @@
 from flask import Flask, render_template
 import btc_chart
 import logging
+import os
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = Flask(__name__)
+# Get the directory where the script is located
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+static_folder = os.path.join(SCRIPT_DIR, 'static')
+
+app = Flask(__name__, static_folder=static_folder)
 
 @app.route('/')
 def dashboard() -> str:
