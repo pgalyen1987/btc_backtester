@@ -7,6 +7,8 @@
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/favicon.ico', v=range(1, 9999999)|random) }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </head>
 <body>
     <div class="dashboard">
@@ -33,7 +35,43 @@
         
         <main class="main-content">
             <header>
-                <h1><i class="fab fa-bitcoin"></i> Bitcoin Price Analysis</h1>
+                <div class="header-left">
+                    <h1><i class="fab fa-bitcoin"></i> Bitcoin Price Analysis</h1>
+                </div>
+                <div class="header-center">
+                    <div class="chart-controls">
+                        <div class="control-group">
+                            <label for="interval">Interval:</label>
+                            <select id="interval" class="control-input">
+                                <optgroup label="Minutes">
+                                    <option value="1m">1 Minute</option>
+                                    <option value="5m">5 Minutes</option>
+                                    <option value="15m">15 Minutes</option>
+                                    <option value="30m">30 Minutes</option>
+                                    <option value="60m">60 Minutes</option>
+                                </optgroup>
+                                <optgroup label="Hours">
+                                    <option value="1h">1 Hour</option>
+                                </optgroup>
+                                <optgroup label="Days">
+                                    <option value="1d" selected>1 Day</option>
+                                    <option value="5d">5 Days</option>
+                                </optgroup>
+                                <optgroup label="Other">
+                                    <option value="1wk">1 Week</option>
+                                    <option value="1mo">1 Month</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label for="dateRange">Date Range:</label>
+                            <input type="text" id="dateRange" class="control-input" placeholder="Select date range">
+                        </div>
+                        <button id="updateChart" class="control-button">
+                            <i class="fas fa-sync-alt"></i> Update Chart
+                        </button>
+                    </div>
+                </div>
                 <div class="header-right">
                     <div class="price-info">
                         <div class="current-price" id="current-price">Loading...</div>
@@ -44,12 +82,30 @@
             </header>
             
             <div class="chart-container">
-                <iframe src="{{ url_for('static', filename='btc_chart.html') }}" frameborder="0"></iframe>
+                <div id="chart-loading" class="loading-overlay">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <span>Updating chart...</span>
+                </div>
+                <iframe id="chartFrame" src="{{ url_for('static', filename='btc_chart.html') }}" frameborder="0"></iframe>
             </div>
         </main>
     </div>
 
     <script>
+        let isUpdating = false;
+
+        // Initialize date picker
+        const dateRangePicker = flatpickr("#dateRange", {
+            mode: "range",
+            maxDate: "today",
+            dateFormat: "Y-m-d",
+            defaultDate: [
+                new Date().setFullYear(new Date().getFullYear() - 1),
+                new Date()
+            ],
+            theme: "dark"
+        });
+
         // Function to format price with commas and 2 decimal places
         function formatPrice(price) {
             return new Intl.NumberFormat('en-US', {
@@ -63,7 +119,132 @@
             return percentage.toFixed(2) + '%';
         }
 
-        // Update the price information
+        // Function to show loading overlay
+        function showLoading() {
+            document.getElementById('chart-loading').style.display = 'flex';
+        }
+
+        // Function to hide loading overlay
+        function hideLoading() {
+            document.getElementById('chart-loading').style.display = 'none';
+        }
+
+        // Function to update the chart
+        async function updateChart() {
+            if (isUpdating) {
+                console.log('Update already in progress, skipping...');
+                return;
+            }
+
+            try {
+                isUpdating = true;
+                showLoading();
+                const interval = document.getElementById('interval').value;
+                const dateRange = dateRangePicker.selectedDates;
+                
+                if (dateRange.length !== 2) {
+                    hideLoading();
+                    showError('Please select a valid date range');
+                    return;
+                }
+
+                const startDate = dateRange[0].toISOString().split('T')[0];
+                const endDate = dateRange[1].toISOString().split('T')[0];
+
+                console.log('Sending update request:', {
+                    interval,
+                    start_date: startDate,
+                    end_date: endDate
+                });
+
+                const response = await fetch('/update_chart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        interval: interval,
+                        start_date: startDate,
+                        end_date: endDate
+                    })
+                });
+
+                let data;
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    data = await response.json();
+                } else {
+                    throw new Error('Server returned non-JSON response');
+                }
+
+                console.log('Server response:', data);
+
+                if (!response.ok) {
+                    throw new Error(data.message || `Server returned ${response.status}`);
+                }
+
+                if (data.status === 'success') {
+                    // Reload the chart iframe with a cache-busting parameter
+                    const chartFrame = document.getElementById('chartFrame');
+                    const timestamp = new Date().getTime();
+                    const newSrc = `{{ url_for('static', filename='btc_chart.html') }}?v=${timestamp}`;
+                    console.log('Updating chart iframe src to:', newSrc);
+                    
+                    // Create a promise that resolves when the iframe loads
+                    const loadPromise = new Promise((resolve, reject) => {
+                        chartFrame.onload = resolve;
+                        chartFrame.onerror = reject;
+                        // Set a timeout of 30 seconds
+                        setTimeout(() => reject(new Error('Chart load timeout')), 30000);
+                    });
+
+                    // Update the iframe src
+                    chartFrame.src = newSrc;
+
+                    // Wait for the iframe to load
+                    await loadPromise;
+                    hideLoading();
+                    showSuccess(`Chart updated successfully with ${data.data.points} data points`);
+                } else {
+                    throw new Error(data.message || 'Failed to update chart');
+                }
+            } catch (error) {
+                console.error('Error updating chart:', error);
+                hideLoading();
+                showError(error.message || 'Error updating chart. Please try again.');
+            } finally {
+                isUpdating = false;
+            }
+        }
+
+        // Function to show error message
+        function showError(message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert error';
+            alertDiv.innerHTML = `
+                <i class="fas fa-exclamation-circle"></i>
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove();">×</button>
+            `;
+            document.querySelector('.main-content').insertBefore(alertDiv, document.querySelector('.chart-container'));
+            setTimeout(() => alertDiv.remove(), 5000);
+        }
+
+        // Function to show success message
+        function showSuccess(message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert success';
+            alertDiv.innerHTML = `
+                <i class="fas fa-check-circle"></i>
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove();">×</button>
+            `;
+            document.querySelector('.main-content').insertBefore(alertDiv, document.querySelector('.chart-container'));
+            setTimeout(() => alertDiv.remove(), 5000);
+        }
+
+        // Update price information
         async function updatePriceInfo() {
             try {
                 const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true');
@@ -86,7 +267,43 @@
             }
         }
 
-        // Update price immediately and every 30 seconds
+        // Debounce function to prevent rapid updates
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Add event listeners with debouncing
+        document.getElementById('updateChart').addEventListener('click', debounce(updateChart, 500));
+        document.getElementById('interval').addEventListener('change', debounce(function() {
+            const selectedInterval = this.value;
+            const now = new Date();
+            let startDate;
+
+            // Adjust date range based on selected interval
+            if (selectedInterval.includes('m')) {
+                // For minute intervals, limit to 7 days
+                startDate = new Date(now - 7 * 24 * 60 * 60 * 1000);
+            } else if (selectedInterval === '1h') {
+                // For hourly interval, limit to 60 days
+                startDate = new Date(now - 60 * 24 * 60 * 60 * 1000);
+            } else {
+                // For daily and above, use 1 year
+                startDate = new Date(now.setFullYear(now.getFullYear() - 1));
+            }
+
+            dateRangePicker.setDate([startDate, new Date()]);
+            updateChart();
+        }, 500));
+
+        // Initial updates
         updatePriceInfo();
         setInterval(updatePriceInfo, 30000);
     </script>
