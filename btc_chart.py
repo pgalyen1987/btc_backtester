@@ -18,11 +18,12 @@ logger = logging.getLogger(__name__)
 # Get the directory where the script is located
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-def get_btc_data(start="2008-01-01", interval="1d") -> DataFrame:
+def get_btc_data(start="2008-01-01", end=None, interval="1d") -> DataFrame:
     """
     Download BTC-USD data from Yahoo Finance
     Args:
         start (str): Start date in YYYY-MM-DD format
+        end (str): End date in YYYY-MM-DD format (optional, defaults to current date)
         interval (str): Data interval (1m, 2m, 5m, 15m, 30m, 60m, 1h, 1d, 5d, 1wk, 1mo)
     Returns:
         pandas.DataFrame: Historical BTC data
@@ -51,32 +52,32 @@ def get_btc_data(start="2008-01-01", interval="1d") -> DataFrame:
         logger.warning(f"Invalid interval '{interval}'. Falling back to daily data.")
         interval = '1d'
     
-    end = datetime.now()
+    end_date = datetime.strptime(end, "%Y-%m-%d") if end else datetime.now()
     start_date = datetime.strptime(start, "%Y-%m-%d")
     
     # Check if requested date range exceeds the limit
     max_days = interval_limits[interval]['days']
-    date_range = (end - start_date).days
+    date_range = (end_date - start_date).days
     
     if date_range > max_days:
         logger.warning(f"Requested date range ({date_range} days) exceeds maximum allowed ({max_days} days) for {interval} interval.")
-        logger.info(f"Adjusting start date to {max_days} days ago.")
-        start_date = end - timedelta(days=max_days)
+        logger.info(f"Adjusting start date to {max_days} days before end date.")
+        start_date = end_date - timedelta(days=max_days)
     
     chunk_size = interval_limits[interval]['chunk_size']
     
     if chunk_size is None:
         # Fetch all data at once for daily and longer intervals
         try:
-            hist = btc.history(start=start_date, end=end, interval=interval)
+            hist = btc.history(start=start_date, end=end_date, interval=interval)
         except Exception as e:
             logger.error(f"Error fetching data: {e}")
             logger.warning("Falling back to daily data.")
-            hist = btc.history(start=start_date, end=end, interval="1d")
+            hist = btc.history(start=start_date, end=end_date, interval="1d")
     else:
         # Fetch data in chunks for minute/hourly intervals
         chunks = []
-        current_end = end
+        current_end = end_date
         current_start = current_end - timedelta(days=chunk_size)
         final_start = start_date
         
@@ -97,7 +98,7 @@ def get_btc_data(start="2008-01-01", interval="1d") -> DataFrame:
         
         if not chunks:
             logger.warning("No data available for the specified interval. Falling back to daily data.")
-            hist = btc.history(start=start_date, end=end, interval="1d")
+            hist = btc.history(start=start_date, end=end_date, interval="1d")
         else:
             hist = pd.concat(chunks[::-1])  # Reverse to get chronological order
             hist = hist[~hist.index.duplicated(keep='first')]  # Remove any duplicates
@@ -151,6 +152,10 @@ def create_interactive_chart(data):
     """
     # Calculate indicators
     data = calculate_indicators(data)
+    
+    # Get the date range from the data
+    start_date = data.index[0]
+    end_date = data.index[-1]
     
     # Create figure with secondary y-axis
     fig = make_subplots(rows=4, cols=1, 
@@ -241,6 +246,26 @@ def create_interactive_chart(data):
             y=0.99,
             xanchor="left",
             x=0.01
+        ),
+        xaxis=dict(
+            type="date",
+            range=[start_date, end_date],
+            autorange=False  # Disable autorange to force our range
+        ),
+        xaxis2=dict(
+            type="date",
+            range=[start_date, end_date],
+            autorange=False
+        ),
+        xaxis3=dict(
+            type="date",
+            range=[start_date, end_date],
+            autorange=False
+        ),
+        xaxis4=dict(
+            type="date",
+            range=[start_date, end_date],
+            autorange=False
         )
     )
 
@@ -258,12 +283,19 @@ def create_interactive_chart(data):
             spikesnap="cursor",
             spikemode="across",
             spikethickness=1,
+            range=[start_date, end_date],
+            autorange=False,  # Disable autorange to force our range
+            constrain="domain",  # Constrain the range to the data domain
             row=i, col=1
         )
 
     # Add range slider and selector to the main price chart
     fig.update_xaxes(
-        rangeslider=dict(visible=True, thickness=0.05),
+        rangeslider=dict(
+            visible=True,
+            thickness=0.05,
+            range=[start_date, end_date]  # Set range for rangeslider too
+        ),
         rangeselector=dict(
             buttons=list([
                 dict(count=1, label="1D", step="day", stepmode="backward"),
@@ -290,6 +322,17 @@ def create_interactive_chart(data):
         hovermode='x unified'
     )
 
+    # Configure additional plot settings
+    config = {
+        'displayModeBar': True,
+        'scrollZoom': True,
+        'showTips': True,
+        'responsive': True,
+        'displaylogo': False,
+        'modeBarButtonsToAdd': ['select2d', 'lasso2d'],  # Add selection tools
+        'modeBarButtonsToRemove': ['autoScale2d']  # Remove auto-scaling
+    }
+
     # Create static directory in the correct location
     static_dir = os.path.join(SCRIPT_DIR, 'static')
     os.makedirs(static_dir, exist_ok=True)
@@ -309,14 +352,6 @@ def create_interactive_chart(data):
     {chart_div}
 </body>
 </html>"""
-
-    config = {
-        'displayModeBar': True,
-        'scrollZoom': True,
-        'showTips': True,
-        'responsive': True,
-        'displaylogo': False,
-    }
 
     # Generate the chart HTML
     chart_html = fig.to_html(

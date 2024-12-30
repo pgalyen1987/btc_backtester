@@ -113,7 +113,7 @@ def create_app():
                 return jsonify({"status": "error", "message": "Start date cannot be after end date"}), 400
             
             # Get BTC data with specified parameters
-            btc_data = btc_chart.get_btc_data(start=start_date, interval=interval)
+            btc_data = btc_chart.get_btc_data(start=start_date, end=end_date, interval=interval)
             
             # Create and save the chart
             btc_chart.create_interactive_chart(btc_data)

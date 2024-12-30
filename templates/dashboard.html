@@ -248,22 +248,43 @@
         async function updatePriceInfo() {
             try {
                 const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 const data = await response.json();
                 
+                if (!data.bitcoin || typeof data.bitcoin.usd === 'undefined') {
+                    throw new Error('Invalid API response format');
+                }
+                
                 const price = data.bitcoin.usd;
-                const change = data.bitcoin.usd_24h_change;
+                const change = data.bitcoin.usd_24h_change || 0;
                 
-                document.getElementById('current-price').textContent = formatPrice(price);
+                const priceElement = document.getElementById('current-price');
                 const priceChangeElement = document.getElementById('price-change');
-                priceChangeElement.textContent = (change >= 0 ? '+' : '') + formatPercentage(change);
-                priceChangeElement.className = 'price-change ' + (change >= 0 ? 'positive' : 'negative');
                 
-                // Update timestamp
-                const now = new Date();
-                document.getElementById('last-updated').textContent = 
-                    'Last updated: ' + now.toLocaleString();
+                if (priceElement && priceChangeElement) {
+                    priceElement.textContent = formatPrice(price);
+                    priceChangeElement.textContent = (change >= 0 ? '+' : '') + formatPercentage(change);
+                    priceChangeElement.className = 'price-change ' + (change >= 0 ? 'positive' : 'negative');
+                    
+                    // Update timestamp
+                    const now = new Date();
+                    const lastUpdated = document.getElementById('last-updated');
+                    if (lastUpdated) {
+                        lastUpdated.textContent = 'Last updated: ' + now.toLocaleString();
+                    }
+                }
             } catch (error) {
                 console.error('Error fetching price:', error);
+                const priceElement = document.getElementById('current-price');
+                const priceChangeElement = document.getElementById('price-change');
+                
+                if (priceElement && priceChangeElement) {
+                    priceElement.textContent = 'Error loading price';
+                    priceChangeElement.textContent = '--';
+                    priceChangeElement.className = 'price-change';
+                }
             }
         }
 
@@ -305,6 +326,7 @@
 
         // Initial updates
         updatePriceInfo();
+        // Update price every 30 seconds
         setInterval(updatePriceInfo, 30000);
     </script>
 </body>
