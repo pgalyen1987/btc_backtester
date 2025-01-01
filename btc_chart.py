@@ -1,10 +1,11 @@
+import warnings
+import pandas as pd
 from pandas import DataFrame
 import yfinance as yf
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from datetime import datetime, timedelta
 import os
-import pandas as pd
 import numpy as np
 import logging
 
@@ -14,6 +15,10 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+# Filter out specific warnings
+warnings.filterwarnings('ignore', category=FutureWarning, module='yfinance.utils')
+warnings.filterwarnings('ignore', category=FutureWarning, module='pandas.core.frame')
 
 # Get the directory where the script is located
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -62,7 +67,7 @@ def get_btc_data(start="2008-01-01", end=None, interval="1d") -> DataFrame:
     if date_range > max_days:
         logger.warning(f"Requested date range ({date_range} days) exceeds maximum allowed ({max_days} days) for {interval} interval.")
         logger.info(f"Adjusting start date to {max_days} days before end date.")
-        start_date = end_date - timedelta(days=max_days)
+        start_date = end_date - pd.Timedelta(days=max_days)
     
     chunk_size = interval_limits[interval]['chunk_size']
     
@@ -78,7 +83,7 @@ def get_btc_data(start="2008-01-01", end=None, interval="1d") -> DataFrame:
         # Fetch data in chunks for minute/hourly intervals
         chunks = []
         current_end = end_date
-        current_start = current_end - timedelta(days=chunk_size)
+        current_start = current_end - pd.Timedelta(days=chunk_size)
         final_start = start_date
         
         while current_start >= final_start and len(chunks) < 100:  # Limit to 100 chunks for safety
@@ -91,7 +96,7 @@ def get_btc_data(start="2008-01-01", end=None, interval="1d") -> DataFrame:
                     logger.warning(f"No data available for period {current_start} to {current_end}")
                 
                 current_end = current_start
-                current_start = current_end - timedelta(days=chunk_size)
+                current_start = current_end - pd.Timedelta(days=chunk_size)
             except Exception as e:
                 logger.error(f"Error fetching chunk: {e}")
                 break
@@ -103,8 +108,8 @@ def get_btc_data(start="2008-01-01", end=None, interval="1d") -> DataFrame:
             hist = pd.concat(chunks[::-1])  # Reverse to get chronological order
             hist = hist[~hist.index.duplicated(keep='first')]  # Remove any duplicates
     
-    # Fill any missing values
-    hist = hist.fillna(method='ffill').fillna(method='bfill')
+    # Forward fill missing values first, then backward fill any remaining NaNs
+    hist = hist.ffill().bfill()
     
     logger.info(f"Successfully fetched {len(hist)} data points with {interval} interval")
     logger.info(f"Date range: from {hist.index[0]} to {hist.index[-1]}")
@@ -283,7 +288,7 @@ def create_interactive_chart(data):
             spikesnap="cursor",
             spikemode="across",
             spikethickness=1,
-            range=[start_date, end_date],
+            range=[start_date, end_date],  # Set the date range
             autorange=False,  # Disable autorange to force our range
             constrain="domain",  # Constrain the range to the data domain
             row=i, col=1
@@ -294,7 +299,11 @@ def create_interactive_chart(data):
         rangeslider=dict(
             visible=True,
             thickness=0.05,
-            range=[start_date, end_date]  # Set range for rangeslider too
+            bgcolor="#232323",
+            yaxis=dict(
+                range=[data['Low'].min(), data['High'].max()],  # Set y-axis range for rangeslider
+                rangemode="fixed"  # Lock the range
+            )
         ),
         rangeselector=dict(
             buttons=list([
@@ -325,12 +334,12 @@ def create_interactive_chart(data):
     # Configure additional plot settings
     config = {
         'displayModeBar': True,
-        'scrollZoom': True,
+        'scrollZoom': False,  # Disable scroll zoom to maintain the selected range
         'showTips': True,
         'responsive': True,
         'displaylogo': False,
-        'modeBarButtonsToAdd': ['select2d', 'lasso2d'],  # Add selection tools
-        'modeBarButtonsToRemove': ['autoScale2d']  # Remove auto-scaling
+        'modeBarButtonsToAdd': ['select2d', 'lasso2d'],
+        'modeBarButtonsToRemove': ['autoScale2d', 'zoomIn2d', 'zoomOut2d']  # Remove zoom buttons
     }
 
     # Create static directory in the correct location
@@ -346,27 +355,99 @@ def create_interactive_chart(data):
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <title>Bitcoin Price Chart</title>
+    <style>
+        body {{
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #1a1a1a;
+        }}
+        .chart-container {{
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+        }}
+    </style>
+    <script>
+        // Block source map requests
+        const originalFetch = window.fetch;
+        window.fetch = function(url, options) {{
+            if (url && typeof url === 'string' && url.endsWith('.map')) {{
+                return new Promise((resolve) => resolve(new Response('', {{status: 200}})));
+            }}
+            return originalFetch(url, options);
+        }};
+        
+        // Disable source maps in Plotly
+        window.PLOTLYENV = {{
+            mapboxAccessToken: undefined,
+            PLOTLYJS_SOURCE_MAP: false,
+            src: ''
+        }};
+        
+        // Force the chart to respect the selected date range
+        window.addEventListener('DOMContentLoaded', function() {{
+            var graphDiv = document.querySelector('.js-plotly-plot');
+            if (graphDiv) {{
+                // Wait for Plotly to be fully initialized
+                var checkPlotly = setInterval(function() {{
+                    if (graphDiv._fullLayout) {{
+                        clearInterval(checkPlotly);
+                        var startDate = new Date('{start_date}');
+                        var endDate = new Date('{end_date}');
+                        
+                        // Force relayout with the correct range
+                        Plotly.relayout(graphDiv, {{
+                            'xaxis.range': [startDate, endDate],
+                            'xaxis2.range': [startDate, endDate],
+                            'xaxis3.range': [startDate, endDate],
+                            'xaxis4.range': [startDate, endDate],
+                            'xaxis.autorange': false,
+                            'xaxis2.autorange': false,
+                            'xaxis3.autorange': false,
+                            'xaxis4.autorange': false
+                        }}).then(function() {{
+                            // Notify parent that chart is ready
+                            window.parent.postMessage('chartReady', '*');
+                        }});
+                    }}
+                }}, 50);
+            }}
+        }});
+    </script>
 </head>
 <body>
-    {chart_div}
+    <div class="chart-container">
+        {chart_div}
+    </div>
 </body>
 </html>"""
 
-    # Generate the chart HTML
+    # Generate the chart HTML with minified scripts and no source maps
     chart_html = fig.to_html(
         full_html=False,
         include_plotlyjs=True,
         config=config,
-        default_height='100vh'
+        default_height='100%',
+        include_mathjax=False,
+        validate=True
     )
-
-    # Combine with template
-    full_html = html_template.format(chart_div=chart_html)
 
     # Write to file
     with open(chart_path, 'w', encoding='utf-8') as f:
-        f.write(full_html)
+        # Format the template with all values at once
+        formatted_html = html_template.format(
+            chart_div=chart_html,
+            start_date=str(start_date),
+            end_date=str(end_date)
+        )
+        f.write(formatted_html)
 
     logger.info(f"Chart saved to {chart_path}")
 

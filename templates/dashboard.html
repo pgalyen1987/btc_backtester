@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bitcoin Price Analysis</title>
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/favicon.ico', v=range(1, 9999999)|random) }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=range(1, 9999999)|random) }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -93,6 +93,14 @@
 
     <script>
         let isUpdating = false;
+        let chartFrame = document.getElementById('chartFrame');
+
+        // Listen for chart ready message
+        window.addEventListener('message', function(event) {
+            if (event.data === 'chartReady') {
+                hideLoading();
+            }
+        });
 
         // Initialize date picker
         const dateRangePicker = flatpickr("#dateRange", {
@@ -186,25 +194,10 @@
 
                 if (data.status === 'success') {
                     // Reload the chart iframe with a cache-busting parameter
-                    const chartFrame = document.getElementById('chartFrame');
                     const timestamp = new Date().getTime();
                     const newSrc = `{{ url_for('static', filename='btc_chart.html') }}?v=${timestamp}`;
                     console.log('Updating chart iframe src to:', newSrc);
-                    
-                    // Create a promise that resolves when the iframe loads
-                    const loadPromise = new Promise((resolve, reject) => {
-                        chartFrame.onload = resolve;
-                        chartFrame.onerror = reject;
-                        // Set a timeout of 30 seconds
-                        setTimeout(() => reject(new Error('Chart load timeout')), 30000);
-                    });
-
-                    // Update the iframe src
                     chartFrame.src = newSrc;
-
-                    // Wait for the iframe to load
-                    await loadPromise;
-                    hideLoading();
                     showSuccess(`Chart updated successfully with ${data.data.points} data points`);
                 } else {
                     throw new Error(data.message || 'Failed to update chart');

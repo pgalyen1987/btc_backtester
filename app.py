@@ -43,6 +43,20 @@ def create_app():
             "type": type(e).__name__
         }), 500
 
+    @app.route('/installHook.js.map', methods=['GET'])
+    def handle_install_hook_map():
+        """Handle installHook.js.map requests."""
+        logger.info("Handling installHook.js.map request")
+        response = make_response('{"version":3,"file":"installHook.js","mappings":"","sources":[],"names":[]}')
+        response.headers.update({
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0',
+            'Access-Control-Allow-Origin': '*'
+        })
+        return response
+
     @app.route('/favicon.ico')
     def favicon():
         try:
@@ -139,14 +153,38 @@ def create_app():
             logger.error(traceback.format_exc())
             return jsonify({"status": "error", "message": str(e)}), 500
 
+    @app.route('/<path:filename>.map')
+    def handle_source_maps(filename):
+        """Handle all other source map requests."""
+        response = make_response('{"version": 3, "sources": [], "mappings": ""}')
+        response.headers['Content-Type'] = 'application/json'
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        return response
+
+    @app.route('/%3Canonymous%20code%3E')
+    def handle_anonymous_code():
+        """Handle anonymous code requests."""
+        response = make_response('{}')
+        response.headers['Content-Type'] = 'application/json'
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        return response
+
     @app.route('/static/<path:filename>')
     def serve_static(filename):
         try:
             response = make_response(send_from_directory(app.static_folder, filename))
-            response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-            response.headers['Pragma'] = 'no-cache'
-            response.headers['Expires'] = '0'
-            response.headers['Last-Modified'] = datetime.now().strftime('%a, %d %b %Y %H:%M:%S GMT')
+            # Set proper MIME type for CSS files
+            if filename.endswith('.css'):
+                response.headers['Content-Type'] = 'text/css; charset=utf-8'
+            response.headers.update({
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0',
+                'Last-Modified': datetime.now().strftime('%a, %d %b %Y %H:%M:%S GMT'),
+                'Vary': 'Accept-Encoding'
+            })
             return response
         except Exception as e:
             logger.error(f"Error serving static file {filename}: {e}")
